@@ -1,11 +1,10 @@
 {
   "keywords": [
     "Fullstack",
-    "React",
-    "TypeScript",
-    "Next.js",
     "JavaScript",
-    "Node.js"
+    "React.js",
+    "Node.js",
+    "Development"
   ],
   "maxAgeHours": 48,
   "titleExclude": [
@@ -112,5 +111,6 @@
     "maxAgeHours": 24,
     "maxApplications": 80,
     "maxYears": 3
-  }
+  },
+  "_keywords_note": "Only real Djinni primary_keyword categories work; unknown values (React, TypeScript, Next.js, Frontend) silently return the global feed. Valid ones seen in the RSS channel header: Fullstack, JavaScript, React.js, Node.js, Development."
 }
