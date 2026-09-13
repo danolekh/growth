@@ -1,0 +1,9 @@
+{
+  "name": "fullstack",
+  "lane": "fullstack",
+  "headline": "Full-Stack TypeScript Developer",
+  "summary": "Full-stack TypeScript developer with about three years of commercial work. I take products from an empty repo to real users: React, Next.js and TanStack on the front, Node or Bun with PostgreSQL and Drizzle on the back, CI/CD and observability around it. Built an ed-tech platform solo that British teachers use today; currently shipping wallet, bonus and identity services for a live iGaming platform. Claude Code daily, everything reviewed.",
+  "maxBullets": 4,
+  "order": ["renewator", "upwork2026", "quextro", "freelance2024", "radency"],
+  "skillsOrder": ["Languages", "Frontend", "Backend", "Data", "Infra", "Other"]
+}

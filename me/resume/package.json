@@ -1,0 +1,6 @@
+{
+  "name": "resume",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "bun run build.ts" }
+}

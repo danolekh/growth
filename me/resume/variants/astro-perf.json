@@ -1,0 +1,9 @@
+{
+  "name": "astro-perf",
+  "lane": "astro",
+  "headline": "Web Developer — Astro, Headless CMS, Core Web Vitals",
+  "summary": "Web developer who builds fast content and marketing sites on Astro, Next.js and headless CMSs (Strapi), and fixes slow ones. Last rescue: mobile PageSpeed 69 to 99 and load time from 16 seconds to under 2, verified in the client's 5.0 review. Multi-locale routing, SEO, pixel-precise Figma implementation, deployments on Vercel and Cloudflare, everything handed over under the client's own accounts.",
+  "maxBullets": 3,
+  "order": ["upwork2026", "renewator", "freelance2024", "quextro", "radency"],
+  "skillsOrder": ["Frontend", "Other", "Languages", "Infra", "Backend", "Data"]
+}

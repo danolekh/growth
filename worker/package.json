@@ -1,0 +1,39 @@
+{
+  "name": "growth-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "alchemy deploy --stage prod",
+    "deploy:dry": "alchemy deploy --stage prod --dry-run",
+    "dev": "alchemy dev --stage dev",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "4.0.0-beta.102",
+    "@effect/platform-node": "4.0.0-beta.102",
+    "@effect/platform-node-shared": "4.0.0-beta.102",
+    "alchemy": "2.0.0-beta.70",
+    "drizzle-orm": "1.0.0-rc.4",
+    "effect": "4.0.0-beta.102",
+    "postal-mime": "^3.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260911.1",
+    "bun-types": "^1.4.2",
+    "drizzle-kit": "1.0.0-rc.4",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.131.1"
+  },
+  "overrides": {
+    "@effect/platform-node-shared": "4.0.0-beta.102",
+    "@effect/platform-node": "4.0.0-beta.102",
+    "@effect/platform-bun": "4.0.0-beta.102",
+    "effect": "4.0.0-beta.102",
+    "@effect/sql-d1": "4.0.0-beta.102",
+    "@effect/sql-sqlite-do": "4.0.0-beta.102",
+    "@effect/vitest": "4.0.0-beta.102",
+    "drizzle-orm": "1.0.0-rc.4",
+    "drizzle-kit": "1.0.0-rc.4"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+.alchemy/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+worker/dist/
+me/resume/out/*.html

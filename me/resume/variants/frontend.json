@@ -1,0 +1,9 @@
+{
+  "name": "frontend",
+  "lane": "frontend",
+  "headline": "Frontend Engineer (React / TypeScript)",
+  "summary": "Frontend-leaning full-stack developer, about three years commercial, React and TypeScript most of the day. React 19, Next.js App Router, TanStack Router and Query, SSR and hydration, Astro for content sites, Tailwind, pixel-precise Figma work. I also build the API behind the UI when needed (Node, Postgres). Best-known result: a site rebuild that took mobile PageSpeed from 69 to 99.",
+  "maxBullets": 3,
+  "order": ["renewator", "upwork2026", "quextro", "freelance2024", "radency"],
+  "skillsOrder": ["Frontend", "Languages", "Backend", "Data", "Infra", "Other"]
+}
