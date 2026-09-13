@@ -1,23 +1,26 @@
 /**
  * growth — the always-on half of Dan's job hunt, as one Alchemy Worker (yielded by alchemy.run.ts).
  *
- * Infrastructure and runtime live in this file on purpose (Infrastructure as Effects): the
- * construction phase below declares the D1 database, the KV namespace, the Workers AI binding,
- * the secrets, the cron and the email route, and the handlers it returns close over the typed
- * clients those declarations produce.
+ * Infrastructure and runtime live together on purpose (Infrastructure as Effects): the init
+ * phase below declares the D1 database, the KV namespace, the Workers AI binding, the email
+ * route and the cron, turns the bindings into services, builds the application layer once per
+ * isolate, and returns handlers that run inside that context.
  */
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Drizzle from "alchemy/Drizzle/D1";
-import { RuntimeContext } from "alchemy/RuntimeContext";
-import type { FunctionContext } from "alchemy/Serverless/Function";
-import { Config, Effect, Option } from "effect";
-import { FetchHttpClient, HttpClient } from "effect/unstable/http";
+import { Context, Effect, Layer } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
 
 import { handleRequest } from "./Api.ts";
-import { makeRepo } from "./Db.ts";
-import type { Deps, Kv, Settings } from "./Deps.ts";
+import { Background, Drizzle as DrizzleDb, KvClient, WorkersAi } from "./Bindings.ts";
 import { ingestMail, parseMail } from "./EmailIngest.ts";
-import { makeTelegram } from "./Telegram.ts";
+import { onEmail } from "./EmailSource.ts";
+import { Kv } from "./Kv.ts";
+import { Repo } from "./Repo.ts";
+import { Routine } from "./Routine.ts";
+import { Scorer } from "./Scorer.ts";
+import { Settings } from "./Settings.ts";
+import { Telegram } from "./Telegram.ts";
 import { runTick } from "./Tick.ts";
 
 const ZONE = "danolekh.com";
@@ -40,8 +43,6 @@ export default Cloudflare.Worker(
       migrationsTable: "drizzle_migrations",
     });
     const namespace = yield* Cloudflare.KV.Namespace("growth-kv");
-
-    // Inbound mail: enable routing on the zone and send jobs@ to this Worker.
     yield* Cloudflare.Email.Routing("jobs-routing", { zone: ZONE });
     yield* Cloudflare.Email.Rule("jobs-rule", {
       zone: ZONE,
@@ -50,78 +51,55 @@ export default Cloudflare.Worker(
       actions: [{ type: "worker", value: [WORKER_NAME] }],
     });
 
-    // ---- bindings ----
+    // ---- bindings → services ----
     const d1 = yield* Cloudflare.D1.QueryDatabase(database);
     const db = yield* Drizzle.D1(d1);
     const kvClient = yield* Cloudflare.KV.ReadWriteNamespace(namespace);
     const ai = yield* Cloudflare.Workers.AI();
     const exec = yield* Cloudflare.Workers.WorkerExecutionContext;
-    const http = yield* HttpClient.HttpClient;
 
-    // ---- configuration (read from .env at deploy time, bound as secrets/vars) ----
-    const telegramToken = yield* Config.option(Config.redacted("TELEGRAM_BOT_TOKEN"));
-    const telegramChatId = yield* Config.string("TELEGRAM_CHAT_ID").pipe(Config.withDefault(""));
-    const telegram = Option.map(telegramToken, (botToken) => ({ botToken, chatId: telegramChatId.trim() }));
-    const settings: Settings = {
-      routineToken: yield* Config.option(Config.redacted("ROUTINE_TOKEN")),
-      adminToken: yield* Config.option(Config.redacted("ADMIN_TOKEN")),
-      webhookSecret: yield* Config.option(Config.redacted("TELEGRAM_WEBHOOK_SECRET")),
-      fireUrl: yield* Config.option(Config.nonEmptyString("ROUTINE_FIRE_URL")),
-      fireToken: yield* Config.option(Config.redacted("ROUTINE_FIRE_TOKEN")),
-      openRouterKey: yield* Config.option(Config.redacted("OPENROUTER_API_KEY")),
-      summaryLocalTime: yield* Config.string("SUMMARY_LOCAL_TIME").pipe(Config.withDefault("08:30")),
-      weeklyLocalTime: yield* Config.string("WEEKLY_LOCAL_TIME").pipe(Config.withDefault("19:00")),
-      inboundAllow: (yield* Config.string("INBOUND_ALLOW").pipe(Config.withDefault("upwork.com,linkedin.com,djinni.co,gmail.com")))
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      maxFiresPerDay: yield* Config.number("MAX_FIRES_PER_DAY").pipe(Config.withDefault(6)),
-      minFireGapMinutes: yield* Config.number("MIN_FIRE_GAP_MINUTES").pipe(Config.withDefault(60)),
-    };
+    const BindingsLayer = Layer.mergeAll(
+      Layer.succeed(DrizzleDb, db as any),
+      Layer.succeed(KvClient, kvClient),
+      Layer.succeed(WorkersAi, ai),
+      Layer.succeed(Background, { run: (effect) => exec.waitUntil(effect) }),
+    );
 
-    const kv: Kv = {
-      get: (key) => kvClient.get(key),
-      put: (key, value, ttl) => kvClient.put(key, value, ttl ? { expirationTtl: Math.max(60, ttl) } : undefined),
-      delete: (key) => kvClient.delete(key),
-    };
-
-    const deps: Deps = {
-      repo: makeRepo(db as any),
-      kv,
-      ai: { run: (model, inputs) => ai.run(model as any, inputs as any) },
-      http,
-      telegram: makeTelegram(http, telegram),
-      settings,
-      waitUntil: (effect) => exec.waitUntil(effect as any),
-    };
+    // ---- the application layer, built once per isolate ----
+    // Handlers also reach for the bindings and the HttpClient directly, so both stay in the
+    // context (provideMerge), while the layers below them are only wired, not re-exported.
+    const AppLayer = Layer.mergeAll(Settings.layer, Kv.layer, Repo.layer, Telegram.layer, Scorer.layer, Routine.layer).pipe(
+      Layer.provideMerge(Layer.mergeAll(Settings.layer, Kv.layer, Repo.layer)),
+      Layer.provideMerge(BindingsLayer),
+      Layer.provideMerge(FetchHttpClient.layer),
+    );
+    const services = yield* Layer.build(AppLayer).pipe(Effect.scoped);
+    const settings = Context.get(services, Settings);
 
     // ---- cron: the five-minute tick ----
     yield* Cloudflare.Workers.cron("*/5 * * * *", (controller) =>
-      runTick(deps, controller.scheduledTime).pipe(
+      runTick(controller.scheduledTime).pipe(
         Effect.catchCause((cause) => Effect.logError("tick failed", { cause: String(cause) })),
+        Effect.provideContext(services),
       ),
     );
 
     // ---- email: the jobs@ inbox ----
-    const ctx = (yield* RuntimeContext) as unknown as FunctionContext;
-    const onEmail = (message: ForwardableEmailMessage) => {
+    yield* onEmail((message) => {
       const allowed = settings.inboundAllow.length === 0 || settings.inboundAllow.some((d) => message.from.toLowerCase().endsWith(d));
       if (!allowed) return Effect.logInfo("mail dropped: sender not allowed", { from: message.from });
       return parseMail(message.raw as any).pipe(
-        Effect.flatMap((mail) => ingestMail(deps, mail)),
+        Effect.flatMap((mail) => ingestMail(mail)),
         Effect.catchCause((cause) => Effect.logError("email failed", { cause: String(cause) })),
+        Effect.provideContext(services),
       );
-    };
-    yield* ctx.listen<void, never>((event: any) => {
-      if (!Cloudflare.Workers.isWorkerEvent(event) || event.type !== "email") return;
-      return onEmail(event.input as ForwardableEmailMessage) as Effect.Effect<void, never, never>;
     });
 
     // ---- http ----
     return {
       fetch: Effect.gen(function* () {
         const request = yield* Cloudflare.Workers.Request;
-        return yield* handleRequest(deps, request as unknown as Request);
+        return yield* handleRequest(request as unknown as Request).pipe(Effect.provideContext(services));
       }),
     };
   }).pipe(
@@ -130,7 +108,6 @@ export default Cloudflare.Worker(
       Cloudflare.KV.ReadWriteNamespaceBinding,
       Cloudflare.Workers.AIBinding,
       Cloudflare.Workers.CronEventSourceLive,
-      FetchHttpClient.layer,
     ]),
   ),
 );

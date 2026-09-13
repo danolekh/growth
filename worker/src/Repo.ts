@@ -1,12 +1,13 @@
 /**
- * The repository: every query the Worker runs, over the Effect-flavoured Drizzle client that
- * Alchemy hands us for D1. Chunked writes respect D1's 100-bound-parameter limit; conditional
- * updates use `meta.changes` as the mutex, since KV has no compare-and-swap.
+ * The repository: every query the Worker runs, as one service over the Effect-flavoured Drizzle
+ * client Alchemy hands us for D1. Chunked writes respect D1's 100-bound-parameter limit;
+ * conditional updates use `meta.changes` as the mutex, since KV has no compare-and-swap.
  */
 import { and, count, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import type { EffectSQLiteD1Database } from "drizzle-orm/effect-d1";
-import { Effect } from "effect";
+import { Context, Effect, Layer } from "effect";
 
+import { Drizzle } from "./Bindings.ts";
 import { applications, contacts, drafts, events, jobs, messages, runs, scores } from "./db/schema.ts";
 
 export type Db = EffectSQLiteD1Database;
@@ -30,7 +31,7 @@ const chunk = <T>(xs: readonly T[], size: number): T[][] => {
 
 const changes = (res: unknown): number => Number((res as any)?.meta?.changes ?? (res as any)?.changes ?? 0);
 
-export const makeRepo = (db: Db) => {
+const makeRepo = (db: Db) => {
   const insertJobs = (rows: NewJob[]) =>
     Effect.forEach(chunk(rows, 5), (c) => db.insert(jobs).values(c).onConflictDoNothing(), { discard: true });
 
@@ -286,4 +287,8 @@ export const makeRepo = (db: Db) => {
   };
 };
 
-export type Repo = ReturnType<typeof makeRepo>;
+export type RepoShape = ReturnType<typeof makeRepo>;
+
+export class Repo extends Context.Service<Repo, RepoShape>()("growth/Repo") {
+  static readonly layer = Layer.effect(Repo)(Effect.map(Drizzle, (db) => makeRepo(db)));
+}

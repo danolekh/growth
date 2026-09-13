@@ -33,8 +33,12 @@ src/Db.ts             repository over Drizzle; schema in src/db/schema.ts; SQL i
    dashboard (Email → Email Routing). In Gmail, filters for `from:upwork.com`,
    `from:linkedin.com`, `from:djinni.co` → forward to `jobs@danolekh.com`. The forwarding
    confirmation shows up in Telegram as an unknown-mail preview.
-7. Routine: create `growth-draft-applications` from `../routines/draft-applications.md`
-   (Claude Code `schedule` skill), copy its fire URL and token into `.env`, redeploy.
+7. Routine: `growth-draft-applications` exists (id `trig_01LoAfzGZZBNMabKZFvDaZJs`,
+   https://claude.ai/code/routines/trig_01LoAfzGZZBNMabKZFvDaZJs), cron `0 5,10,15 * * *` UTC. To let
+   the Worker fire it on demand for hot jobs, open that page, copy the HTTP trigger URL and token
+   into `.env` as `ROUTINE_FIRE_URL` / `ROUTINE_FIRE_TOKEN`, redeploy. Without them the three
+   scheduled runs a day still happen. Regenerate the prompt after edits with
+   `bun scripts/routine-prompt.ts` and update the routine via the `schedule` skill.
 8. `cd ../me/resume && bun run build && cd ../.. && bun scripts/upload-resumes.ts`.
 9. `bun scripts/seed-legacy.ts` → three cards appear.
 

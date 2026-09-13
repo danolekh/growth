@@ -7,6 +7,7 @@ import { Effect, Schedule } from "effect";
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http";
 
 import config from "../djinni-config.json";
+import { DjinniFetchError } from "./Errors.ts";
 
 export interface DjinniConfig {
   keywords: string[];
@@ -229,13 +230,6 @@ export const parseDetail = (html: string): JobDetail => {
 
 // ---------- fetchers ----------
 
-export class DjinniFetchError extends Error {
-  readonly _tag = "DjinniFetchError";
-  constructor(readonly url: string, readonly cause: unknown) {
-    super(`fetch failed: ${url}`);
-  }
-}
-
 const getText = (client: HttpClient.HttpClient, url: string, accept: string) =>
   HttpClientRequest.get(url).pipe(
     HttpClientRequest.setHeaders({ "user-agent": UA, accept }),
@@ -244,7 +238,7 @@ const getText = (client: HttpClient.HttpClient, url: string, accept: string) =>
     Effect.flatMap((res) => res.text),
     Effect.timeout("15 seconds"),
     Effect.retry({ schedule: Schedule.exponential("500 millis"), times: 1 }),
-    Effect.mapError((cause) => new DjinniFetchError(url, cause)),
+    Effect.mapError((cause) => DjinniFetchError.make({ url, cause })),
   );
 
 export const fetchRss = (client: HttpClient.HttpClient, keyword: string) =>
