@@ -9,6 +9,8 @@ src/Api.ts            HTTP: /telegram webhook, /api/* for the routine, /api/admi
 src/Tick.ts           the */5 cron: one RSS keyword, enrich, score, card, fire, summaries
 src/Ingest.ts         jobs pipeline (new → enriched → scored → drafted → applied)
 src/Djinni.ts         RSS + public job-page parsing and the deterministic filters
+src/HackerNews.ts     "Who is hiring?" via Algolia, one page per hour, remote + on-stack only
+src/EffectJobs.ts     effect.website/effect-jobs directory, once a day, remote cards land hot
 src/Email*.ts         jobs@danolekh.com: classify alerts and messages, extract job links
 src/Score.ts          Workers AI scoring (JSON schema), OpenRouter fallback
 src/Telegram.ts       bot client (from the sportmagaz worker) + cards in src/Cards.ts
@@ -46,6 +48,8 @@ src/Db.ts             repository over Drizzle; schema in src/db/schema.ts; SQL i
 - `bun test` for the parsers. `bun run typecheck`.
 - Schema change: edit `src/db/schema.ts`, `bunx drizzle-kit generate`,
   `bun scripts/sync-migrations.ts`, deploy.
+- Scoring thresholds: `SCORE_APPLY_MIN` (default 15) and `SCORE_LOW_MIN` (default 12, set to 11
+  in .env) decide apply vs apply-low vs skip out of 20. Lower SCORE_LOW_MIN for more cards.
 - `POST $WORKER_URL/api/admin/tick` with the admin token runs a tick on demand;
   `/api/admin/ingest?keyword=React` pulls one feed; `/api/admin/stats` prints counts.
 - Bot commands: `/ping`, `/summary`, `/queue`, `/fire`, `/stage <applicationId> <stage>`.

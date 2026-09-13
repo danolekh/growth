@@ -9,7 +9,7 @@
 import { Effect } from "effect";
 
 import { djinniConfig } from "./Djinni.ts";
-import { cardPendingDrafts, cardScored, enrichDjinni, ingestDjinniKeyword, ingestHackerNews, scoreEnriched } from "./Ingest.ts";
+import { cardPendingDrafts, cardScored, enrichDjinni, ingestDjinniKeyword, ingestEffectJobs, ingestHackerNews, scoreEnriched } from "./Ingest.ts";
 import { Kv } from "./Kv.ts";
 import { now, Repo } from "./Repo.ts";
 import { Routine } from "./Routine.ts";
@@ -55,6 +55,9 @@ export const runTick = Effect.fn("Tick.run")(function* (scheduledTime: number, o
 
   // 1b. Hacker News "Who is hiring": one page per hour, on the top-of-hour tick.
   if (local.minute < 5) stats.hn = yield* ingestHackerNews().pipe(swallow("hn", { error: true }));
+
+  // 1c. The Effect job directory, once a day at 09:00 local.
+  if (local.hour === 9 && local.minute < 5) stats.effect = yield* ingestEffectJobs().pipe(swallow("effect", { error: true }));
 
   // 2. Enrich, 3. score, 4. card.
   stats.enriched = yield* enrichDjinni(ENRICH_PER_TICK).pipe(swallow("enrich", 0));

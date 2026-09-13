@@ -18,6 +18,7 @@ import {
   type JobDetail,
 } from "./Djinni.ts";
 import type { ExtractedJob } from "./Email.ts";
+import { EFFECT_JOBS_URL, fetchEffectJobs } from "./EffectJobs.ts";
 import { fetchLatestThread, fetchPage } from "./HackerNews.ts";
 import { Kv } from "./Kv.ts";
 import { HttpClient } from "effect/unstable/http";
@@ -140,6 +141,40 @@ export const ingestHackerNews = Effect.fn("Ingest.hackerNews")(function* () {
   const next = result.pages > 0 ? (page + 1) % result.pages : 0;
   yield* kv.put("hn:page", String(next));
   return { thread: threadId, page, pages: result.pages, kept: result.posts.length, inserted: rows.length };
+});
+
+/** The Effect job directory, once a day. New remote cards land hot; on-site ones are stored skipped. */
+export const ingestEffectJobs = Effect.fn("Ingest.effectJobs")(function* () {
+  const client = yield* HttpClient.HttpClient;
+  const repo = yield* Repo;
+  const jobs = yield* fetchEffectJobs(client);
+  const seen = yield* repo.existingJobIds(jobs.map((j) => `effect:${j.id}`));
+  const rows: NewJob[] = [];
+  for (const j of jobs) {
+    const id = `effect:${j.id}`;
+    if (seen.has(id)) continue;
+    const skip = !j.remote || j.flags.includes("us-only") || j.flags.includes("intern");
+    rows.push({
+      id,
+      source: "effect",
+      externalId: j.id,
+      url: j.applyUrl,
+      title: `${j.company} · ${j.role}`,
+      description: [j.blurb, j.pay ? `Pay: ${j.pay}` : null, `Location: ${j.location}`, `Directory: ${EFFECT_JOBS_URL}`].filter(Boolean).join("\n"),
+      postedAt: now(),
+      firstSeenAt: now(),
+      updatedAt: now(),
+      keywords: JSON.stringify(["effect-jobs"]),
+      flags: JSON.stringify(j.flags),
+      filterReason: skip ? (j.remote ? (j.flags.includes("intern") ? "intern" : "us-only") : "onsite") : null,
+      status: skip ? "skipped" : "enriched",
+      hot: skip ? 0 : 1,
+      company: j.company,
+      detail: JSON.stringify({ detail_error: "directory-card", work_format: j.remote ? "Remote" : "On-site", countries: j.location, salary: j.pay ?? undefined }),
+    });
+  }
+  if (rows.length) yield* repo.insertJobs(rows);
+  return { cards: jobs.length, inserted: rows.length };
 });
 
 /** Jobs that arrived by email already carry all we will ever know; they skip the page fetch. */

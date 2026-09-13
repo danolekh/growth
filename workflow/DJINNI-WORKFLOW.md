@@ -6,8 +6,8 @@ sends a week, often to posts that were days old with hundreds of applicants. Thi
 the watcher's inbox into three to five tailored sends a day.
 
 ## 1. Load the hunt
-- The Worker does the ingest now (Djinni RSS every 30 min, alert emails from Upwork, LinkedIn and
-  Djinni). The queue of jobs worth drafting is `GET /api/queue` on the Worker (bearer token in
+- The Worker does the ingest now (Djinni RSS every 20 min, Hacker News "Who is hiring" hourly,
+  the Effect job directory daily, alert emails from Upwork, LinkedIn and Djinni). The queue of jobs worth drafting is `GET /api/queue` on the Worker (bearer token in
   `worker/.env`). `scripts/queue.ts` prints it; `/hunt-job` reads it.
 - `detail.detail_error` on a job means the public page fetch failed; triage on RSS data and say
   the salary/years/applications are unknown.

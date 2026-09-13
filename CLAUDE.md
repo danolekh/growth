@@ -6,9 +6,9 @@ readers: Claude Code sessions on Dan's Mac (you, now) and the cloud routine
 schedule. Anything a routine needs must be committed here; routines cannot see Dan's machine.
 
 ## The system in one paragraph
-A Cloudflare Worker (`worker/`, Effect 4 + Alchemy + Drizzle on D1) pulls Djinni RSS every 30
-minutes, receives Upwork, LinkedIn and Djinni alert emails at `jobs@danolekh.com`, filters and
-scores jobs, and asks the cloud routine to draft tailored applications. Dan gets each draft as a
+A Cloudflare Worker (`worker/`, Effect 4 + Alchemy + Drizzle on D1) pulls Djinni RSS every 20
+minutes, the Hacker News hiring thread hourly and the Effect job directory daily, receives
+Upwork, LinkedIn and Djinni alert emails at `jobs@danolekh.com`, filters and scores jobs, and asks the cloud routine to draft tailored applications. Dan gets each draft as a
 Telegram card with Apply / Skip / Later; Apply hands him the ready text, form settings, resume
 PDF and link. Nothing is ever auto-submitted on Upwork or LinkedIn. A daily summary lands at
 08:30 Vienna. The plan and the numbers live in `playbook/income-plan-2026-09.md`.
