@@ -38,9 +38,9 @@ export class Settings extends Context.Service<
     Effect.gen(function* () {
       const botToken = yield* Config.option(Config.redacted("TELEGRAM_BOT_TOKEN"));
       const chatId = yield* Config.string("TELEGRAM_CHAT_ID").pipe(Config.withDefault(""));
-      const allow = yield* Config.string("INBOUND_ALLOW").pipe(
-        Config.withDefault("upwork.com,linkedin.com,djinni.co,gmail.com"),
-      );
+      // Empty by default: recruiters write from any domain, and unknown mail is only previewed.
+      // Set it to a comma-separated list of sender domains to hard-drop everything else.
+      const allow = yield* Config.string("INBOUND_ALLOW").pipe(Config.withDefault(""));
       return {
         telegram: Option.map(botToken, (token) => ({ botToken: token, chatId: chatId.trim() })),
         webhookSecret: yield* Config.option(Config.redacted("TELEGRAM_WEBHOOK_SECRET")),
