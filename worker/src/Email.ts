@@ -41,12 +41,15 @@ export const classify = (mail: ParsedMail): MailKind => {
     return "upwork-alert";
   }
   if (from.includes("linkedin.com")) {
-    if (from.startsWith("jobs-noreply") || /job alert|jobs? for you|new jobs|hiring/.test(subject)) return "linkedin-alert";
+    if (from.startsWith("jobs-noreply") || from.startsWith("jobalerts-noreply") || /job alert|jobs? for you|new jobs|hiring/.test(subject))
+      return "linkedin-alert";
     if (from.startsWith("messages-noreply") || from.startsWith("invitations") || /message|inmail|invitation|replied/.test(subject))
       return "linkedin-message";
     return "linkedin-alert";
   }
   if (from.includes("djinni.co")) {
+    // magic@djinni.co sends both job digests and recruiter-message notifications; the subject decides.
+    if (/відповів|написа|повідомлення|message|replied|відгук/.test(subject)) return "djinni-message";
     if (/нов[іи]|ваканс|jobs?|match|підбір/.test(subject)) return "djinni-alert";
     return "djinni-message";
   }

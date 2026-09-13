@@ -23,6 +23,12 @@ describe("email classification", () => {
     expect(classify(mail({ from: "notify@djinni.co", subject: "Роботодавець відповів на ваш відгук" }))).toBe("djinni-message");
     expect(classify(mail({ from: "noreply@djinni.co", subject: "Нові вакансії для вас" }))).toBe("djinni-alert");
   });
+  test("the exact senders Dan filters on", () => {
+    expect(classify(mail({ from: "donotreply@upwork.com", subject: "New job: Next.js dashboard for a SaaS" }))).toBe("upwork-alert");
+    expect(classify(mail({ from: "jobalerts-noreply@linkedin.com", subject: "Acme GmbH is hiring: Full Stack Developer" }))).toBe("linkedin-alert");
+    expect(classify(mail({ from: "magic@djinni.co", subject: "Вакансії, що можуть вас зацікавити" }))).toBe("djinni-alert");
+    expect(classify(mail({ from: "magic@djinni.co", subject: "Tone Singleton відповів на ваш відгук" }))).toBe("djinni-message");
+  });
   test("unknown senders", () => {
     expect(classify(mail({ from: "forwarding-noreply@google.com", subject: "Gmail Forwarding Confirmation" }))).toBe("unknown");
   });
