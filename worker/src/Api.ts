@@ -270,7 +270,9 @@ const handleUpdate = Effect.fn("Api.handleUpdate")(function* (update: typeof Tel
     const fromChat = String(cb.message?.chat?.id ?? "");
     if (telegram.configured && fromChat !== telegram.chatId) return;
     const data = cb.data ?? "";
-    const [kind, id] = data.split(":", 2) as [string, string];
+    const sep = data.indexOf(":");
+    const kind = sep > -1 ? data.slice(0, sep) : data;
+    const id = sep > -1 ? data.slice(sep + 1) : "";
     const result = yield* callbackAction(kind, id).pipe(
       Effect.catch((err) => Effect.logWarning("callback failed", { data, err: String(err) }).pipe(Effect.as("Something failed, check logs"))),
     );

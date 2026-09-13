@@ -125,6 +125,7 @@ export const ingestHackerNews = Effect.fn("Ingest.hackerNews")(function* () {
       externalId: p.id,
       url: p.url,
       title: p.title,
+      company: p.company,
       description: p.text,
       postedAt: p.createdAt,
       firstSeenAt: now(),

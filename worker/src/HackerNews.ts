@@ -28,6 +28,7 @@ export interface HnPage {
 export interface HnPost {
   readonly id: string;
   readonly url: string;
+  readonly company: string | null;
   readonly title: string;
   readonly text: string;
   readonly createdAt: string;
@@ -57,6 +58,8 @@ export const parsePage = (json: any, threadId: string): HnPage => {
     if (!STACK.test(text) || !REMOTE.test(text)) continue;
     const firstLine = text.split("\n")[0]?.trim() ?? "";
     const title = (firstLine.length > 8 ? firstLine : text.slice(0, 100)).slice(0, 120);
+    const segments = firstLine.split("|").map((s) => s.trim()).filter(Boolean);
+    const company = segments.length > 1 && segments[0]!.length <= 60 ? segments[0]!.replace(/\s*\(.*?\)\s*$/, "") : null;
     const flags = ["hn"];
     const usOnly = US_ONLY.test(text) && !OPEN.test(text);
     if (usOnly) flags.push("us-only");
@@ -68,6 +71,7 @@ export const parsePage = (json: any, threadId: string): HnPage => {
     posts.push({
       id: String(h.objectID),
       url: `https://news.ycombinator.com/item?id=${h.objectID}`,
+      company,
       title,
       text: text.slice(0, 6000),
       createdAt: String(h.created_at),

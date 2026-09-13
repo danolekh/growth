@@ -24,6 +24,14 @@ describe("Hacker News who is hiring", () => {
     }
   });
 
+  test("decodes hex entities and reads the company from the first segment", () => {
+    const p = parsePage(page0, "49522897");
+    for (const post of p.posts) expect(post.title).not.toContain("&#x");
+    const boss = p.posts.find((x) => x.title.startsWith("BOSS-IQ"));
+    expect(boss?.company).toBe("BOSS-IQ");
+    expect(boss?.title).toContain("https://boss-iq.com");
+  });
+
   test("flags US-only remote posts and open-region ones", () => {
     const p = parsePage(page0, "49522897");
     const usOnly = p.posts.filter((x) => x.flags.includes("us-only"));
