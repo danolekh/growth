@@ -41,6 +41,7 @@ export interface TelegramClient {
 
 export interface TelegramCredentials {
   readonly botToken: Redacted.Redacted<string>;
+  /** Empty until Dan sends /start and the id is put in TELEGRAM_CHAT_ID. */
   readonly chatId: string;
 }
 
@@ -69,6 +70,8 @@ export const makeTelegram = (
 
   const { botToken, chatId } = credentials.value;
   const base = `https://api.telegram.org/bot${Redacted.value(botToken)}`;
+  const needChat = <A>(value: A) =>
+    Effect.logWarning("telegram chat id not set; skipping message (send /start to the bot)").pipe(Effect.as(value));
 
   const call = (method: string, body: Record<string, unknown>) =>
     HttpClientRequest.post(`${base}/${method}`).pipe(
@@ -88,7 +91,7 @@ export const makeTelegram = (
     configured: true,
     chatId,
     send: (html, options) =>
-      call("sendMessage", {
+      !chatId ? needChat(-1) : call("sendMessage", {
         chat_id: chatId,
         text: html,
         parse_mode: "HTML",
@@ -97,13 +100,13 @@ export const makeTelegram = (
         ...markup(options),
       }).pipe(Effect.map((r) => Number((r as any)?.result?.message_id ?? -1))),
     sendDocument: (fileId, caption) =>
-      call("sendDocument", {
+      !chatId ? needChat(undefined) : call("sendDocument", {
         chat_id: chatId,
         document: fileId,
         ...(caption ? { caption, parse_mode: "HTML" } : {}),
       }).pipe(Effect.asVoid),
     edit: (messageId, html, options) =>
-      call("editMessageText", {
+      !chatId ? needChat(undefined) : call("editMessageText", {
         chat_id: chatId,
         message_id: messageId,
         text: html,

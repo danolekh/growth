@@ -12,7 +12,7 @@ import { now } from "./Db.ts";
 import type { Deps } from "./Deps.ts";
 import { djinniConfig } from "./Djinni.ts";
 import { fireRoutine } from "./Fire.ts";
-import { cardScored, enrichDjinni, ingestDjinniKeyword, scoreEnriched } from "./Ingest.ts";
+import { cardPendingDrafts, cardScored, enrichDjinni, ingestDjinniKeyword, scoreEnriched } from "./Ingest.ts";
 import { dailySummary, housekeeping, weeklySummary } from "./Summary.ts";
 import { inSlot, localTime } from "./Time.ts";
 
@@ -49,6 +49,7 @@ export const runTick = (deps: Deps, scheduledTime: number) =>
     stats.enriched = yield* enrichDjinni(deps, ENRICH_PER_TICK).pipe(swallow("enrich", 0));
     stats.scored = yield* scoreEnriched(deps, SCORE_PER_TICK).pipe(swallow("score", 0));
     stats.carded = yield* cardScored(deps, CARDS_PER_TICK).pipe(swallow("card", 0));
+    stats.draftCards = yield* cardPendingDrafts(deps, CARDS_PER_TICK).pipe(swallow("draft-cards", 0));
 
     // 5. Ask the routine to draft when something hot is waiting or a reply was requested.
     const waiting = yield* deps.repo.queueJobs(5).pipe(swallow("queue", []));

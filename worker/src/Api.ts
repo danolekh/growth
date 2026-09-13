@@ -341,8 +341,10 @@ const acceptDraft = (deps: Deps, body: Json) =>
         if (edited) mid = job.tgMessageId;
       }
       if (mid < 0) mid = yield* deps.telegram.send(found.card, { keyboard, silent: job.hot !== 1 }).pipe(Effect.catch(() => Effect.succeed(-1)));
-      yield* deps.repo.updateDraft(draftId, { status: "carded", tgMessageId: mid > 0 ? mid : null });
-      yield* deps.repo.insertEvent({ jobId, draftId, kind: "card", at: now() });
+      if (mid > 0) {
+        yield* deps.repo.updateDraft(draftId, { status: "carded", tgMessageId: mid });
+        yield* deps.repo.insertEvent({ jobId, draftId, kind: "card", at: now() });
+      }
     }
     return { ok: true, draftId };
   });
@@ -366,7 +368,7 @@ const seed = (deps: Deps, body: Json) =>
       const found = yield* cardTextForDraft(deps, draftId);
       if (found) {
         const mid = yield* deps.telegram.send(found.card, { keyboard: draftKeyboard(draftId) }).pipe(Effect.catch(() => Effect.succeed(-1)));
-        yield* deps.repo.updateDraft(draftId, { status: "carded", tgMessageId: mid > 0 ? mid : null });
+        if (mid > 0) yield* deps.repo.updateDraft(draftId, { status: "carded", tgMessageId: mid });
         if (d.jobId) yield* deps.repo.updateJob(String(d.jobId), { status: "drafted" });
       }
     }

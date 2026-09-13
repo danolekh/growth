@@ -4,7 +4,7 @@
  */
 import { Effect } from "effect";
 
-import { jobCard, noDraftKeyboard } from "./Cards.ts";
+import { draftKeyboard, jobCard, noDraftKeyboard } from "./Cards.ts";
 import { now, type JobRow, type NewJob } from "./Db.ts";
 import type { Deps } from "./Deps.ts";
 import {
@@ -19,7 +19,7 @@ import {
   rssVerdict,
   type JobDetail,
 } from "./Djinni.ts";
-import { score, type ScoreInput } from "./Score.ts";
+import { detectLanguage, score, type ScoreInput } from "./Score.ts";
 import type { ExtractedJob } from "./Email.ts";
 
 const parseJson = <T>(s: string | null, fallback: T): T => {
@@ -148,6 +148,7 @@ export const scoreEnriched = (deps: Deps, limit: number) =>
         description: job.description,
         detail: jobDetail(job) as Record<string, unknown>,
         flags: jobFlags(job),
+        language: detectLanguage(`${job.title}\n${job.description}`),
       };
       const result = yield* score(deps.ai, deps.http, deps.settings.openRouterKey, input).pipe(
         Effect.map((r) => ({ ok: true as const, r })),
@@ -184,6 +185,45 @@ export const scoreEnriched = (deps: Deps, limit: number) =>
       scored++;
     }
     return scored;
+  });
+
+/** Drafts still `pending` (the POST-time send failed, or Telegram was not configured yet) get their card here. */
+export const cardPendingDrafts = (deps: Deps, limit: number) =>
+  Effect.gen(function* () {
+    if (!deps.telegram.configured || !deps.telegram.chatId) return 0;
+    const pending = yield* deps.repo.draftsByStatus("pending", limit, "application");
+    let sent = 0;
+    for (const d of pending) {
+      if (!d.jobId) continue;
+      const job = yield* deps.repo.jobById(d.jobId);
+      if (!job) continue;
+      const sc = yield* deps.repo.scoreByJob(job.id);
+      const text = jobCard(
+        {
+          id: job.id,
+          source: job.source,
+          title: job.title,
+          company: job.company,
+          url: job.url,
+          postedAt: job.postedAt,
+          firstSeenAt: job.firstSeenAt,
+          flags: jobFlags(job),
+          hot: job.hot === 1,
+          detail: jobDetail(job) as Record<string, any>,
+        },
+        sc ? { total: sc.total, verdict: sc.verdict, summary: sc.summary } : null,
+        { id: d.id, kind: d.kind, salaryAsk: d.salaryAsk, resumeVariant: d.resumeVariant, language: d.language },
+      );
+      const mid = yield* deps.telegram
+        .send(text, { keyboard: draftKeyboard(d.id), silent: job.hot !== 1 })
+        .pipe(Effect.catch((err) => Effect.logWarning("draft card failed", { err: String(err) }).pipe(Effect.as(-1))));
+      if (mid > 0) {
+        yield* deps.repo.updateDraft(d.id, { status: "carded", tgMessageId: mid }, "pending");
+        yield* deps.repo.insertEvent({ jobId: job.id, draftId: d.id, kind: "card", at: now() });
+        sent++;
+      }
+    }
+    return sent;
   });
 
 /** Card scored jobs that have no card yet, so hot ones reach Dan before the routine drafts them. */

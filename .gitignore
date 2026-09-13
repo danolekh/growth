@@ -7,3 +7,4 @@ node_modules/
 .DS_Store
 worker/dist/
 me/resume/out/*.html
+routines/*.local.md

@@ -59,12 +59,9 @@ export default Cloudflare.Worker(
     const http = yield* HttpClient.HttpClient;
 
     // ---- configuration (read from .env at deploy time, bound as secrets/vars) ----
-    const telegram = yield* Config.option(
-      Config.all({
-        botToken: Config.redacted("TELEGRAM_BOT_TOKEN"),
-        chatId: Config.nonEmptyString("TELEGRAM_CHAT_ID"),
-      }),
-    );
+    const telegramToken = yield* Config.option(Config.redacted("TELEGRAM_BOT_TOKEN"));
+    const telegramChatId = yield* Config.string("TELEGRAM_CHAT_ID").pipe(Config.withDefault(""));
+    const telegram = Option.map(telegramToken, (botToken) => ({ botToken, chatId: telegramChatId.trim() }));
     const settings: Settings = {
       routineToken: yield* Config.option(Config.redacted("ROUTINE_TOKEN")),
       adminToken: yield* Config.option(Config.redacted("ADMIN_TOKEN")),

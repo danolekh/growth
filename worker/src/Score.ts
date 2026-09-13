@@ -15,7 +15,16 @@ export interface ScoreInput {
   readonly description: string;
   readonly detail: Record<string, unknown> | null;
   readonly flags: string[];
+  /** Decided by script, not by the model: uk when the post is mostly Cyrillic. */
+  readonly language: "en" | "uk";
 }
+
+/** Share of Cyrillic among letters; above 0.2 the post is treated as Ukrainian. */
+export const detectLanguage = (text: string): "en" | "uk" => {
+  const letters = text.match(/\p{L}/gu)?.length ?? 0;
+  const cyr = text.match(/[\u0400-\u04FF]/g)?.length ?? 0;
+  return letters > 0 && cyr / letters > 0.2 ? "uk" : "en";
+};
 
 export interface ScoreResult {
   readonly skills_fit: number;
@@ -62,8 +71,8 @@ export const SYSTEM_PROMPT = `You score job posts for Daniil, a full-stack TypeS
 - winnability: fresh post, moderate applicant count, years required <= 3, remote, clear scope = 5; 5+ years, on-site, hundreds of applicants = 1.
 - stackability: small team, async, product company, ownership, part-time possible = 5; outstaff scrum team with daily calls and strict 9-6 overlap = 1.
 - signal: real company with a specific post = 5; recycled template, vague, salary hidden = 2.
-language: "uk" if the post is mostly Ukrainian, else "en".
-summary: two short lines, in that language, saying what the job is and the one thing that makes it a fit or not. Return JSON only.`;
+language: copy the "Language" line from the input.
+summary: two short lines, written in that language (uk = Ukrainian, en = English), saying what the job is and the one thing that makes it a fit or not. Return JSON only.`;
 
 const userPrompt = (input: ScoreInput) =>
   [
@@ -71,6 +80,7 @@ const userPrompt = (input: ScoreInput) =>
     `Title: ${input.title}`,
     `Company: ${input.company ?? "unknown"}`,
     `Flags: ${input.flags.join(", ") || "none"}`,
+    `Language: ${input.language}`,
     `Detail: ${JSON.stringify(input.detail ?? {})}`,
     "Post:",
     input.description.slice(0, 3500),
@@ -78,7 +88,7 @@ const userPrompt = (input: ScoreInput) =>
 
 const clamp = (n: unknown): number => Math.min(5, Math.max(1, Math.round(Number(n) || 1)));
 
-const parseResult = (raw: unknown, model: string): ScoreResult => {
+const parseResult = (raw: unknown, model: string, language: "en" | "uk"): ScoreResult => {
   let obj: any = raw;
   if (obj && typeof obj === "object" && "response" in obj) obj = (obj as any).response;
   if (typeof obj === "string") {
@@ -99,7 +109,7 @@ const parseResult = (raw: unknown, model: string): ScoreResult => {
     signal,
     total,
     verdict,
-    language: obj.language === "uk" ? "uk" : "en",
+    language,
     summary: String(obj.summary ?? "").slice(0, 400),
     model,
   };
@@ -116,7 +126,7 @@ const viaWorkersAi = (ai: AiRunner, model: string, input: ScoreInput) =>
       max_tokens: 400,
     })
     .pipe(
-      Effect.flatMap((raw) => Effect.try({ try: () => parseResult(raw, model), catch: (e) => e })),
+      Effect.flatMap((raw) => Effect.try({ try: () => parseResult(raw, model, input.language), catch: (e) => e })),
       Effect.mapError((cause) => new ScoreError(model, cause)),
     );
 
@@ -138,7 +148,7 @@ const viaOpenRouter = (client: HttpClient.HttpClient, key: Redacted.Redacted<str
     Effect.timeout("25 seconds"),
     Effect.flatMap((json: any) =>
       Effect.try({
-        try: () => parseResult(json?.choices?.[0]?.message?.content, OPENROUTER_MODEL),
+        try: () => parseResult(json?.choices?.[0]?.message?.content, OPENROUTER_MODEL, input.language),
         catch: (e) => e,
       }),
     ),
