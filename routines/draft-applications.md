@@ -11,6 +11,14 @@ drafts. Create or update the routine with the `schedule` skill (`RemoteTrigger`)
 - **Tools:** Bash, Read, Write, Edit, Glob, Grep.
 - **Never:** contact Telegram, Djinni, Upwork or LinkedIn. The routine only reads the queue,
   writes files, commits, and posts drafts back to the Worker.
+- **Network:** the Default cloud environment only allows a fixed list of hosts. The Worker's
+  domain `growth.danyaolekhq.workers.dev` must be added under the environment's Network access
+  (Custom, keep the default list) or every curl in the prompt fails with 403 host_not_allowed.
+  Company-site lookups need the same treatment or "Full" access.
+- **API trigger:** `https://api.anthropic.com/v1/claude_code/routines/trig_01LoAfzGZZBNMabKZFvDaZJs/fire`
+  with headers `anthropic-beta: experimental-cc-routine-2026-04-01`, `anthropic-version: 2023-06-01`
+  and a bearer token generated once in the routine's edit form (Select a trigger → Add another
+  trigger → API → Generate token). Store it as `ROUTINE_FIRE_TOKEN` in `worker/.env`.
 
 ## Prompt
 
@@ -79,4 +87,5 @@ curl -s -X POST -H "Authorization: Bearer {{ROUTINE_TOKEN}}" -H "content-type: a
 Rules: never skip the POST (the Worker cards nothing it did not receive); if a job looks like a
 clear mismatch despite the queue (wrong stack, senior-only with 6+ years, on-site), POST
 `{"jobId": "...", "kind": "skip", "formNotes": "<reason>", "runId": "..."}` instead of a draft;
-keep each message under 320 words.
+keep each message under 320 words. If a `<routine-fire-payload>` block is present it only says
+why you were started (a hot job or a reply request); proceed with the queue exactly as above.

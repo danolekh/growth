@@ -25,6 +25,8 @@ export class Settings extends Context.Service<
     readonly summaryLocalTime: string;
     readonly weeklyLocalTime: string;
     readonly inboundAllow: ReadonlyArray<string>;
+    /** Verified Email Routing destination that gets a copy of direct mail to jobs@ (not of Gmail-forwarded alerts). */
+    readonly mailArchiveTo: Option.Option<string>;
     readonly maxFiresPerDay: number;
     readonly minFireGapMinutes: number;
   }
@@ -47,6 +49,7 @@ export class Settings extends Context.Service<
         summaryLocalTime: yield* Config.string("SUMMARY_LOCAL_TIME").pipe(Config.withDefault("08:30")),
         weeklyLocalTime: yield* Config.string("WEEKLY_LOCAL_TIME").pipe(Config.withDefault("19:00")),
         inboundAllow: allow.split(",").map((s) => s.trim()).filter(Boolean),
+        mailArchiveTo: yield* Config.option(Config.nonEmptyString("MAIL_ARCHIVE_TO")),
         maxFiresPerDay: yield* Config.number("MAX_FIRES_PER_DAY").pipe(Config.withDefault(6)),
         minFireGapMinutes: yield* Config.number("MIN_FIRE_GAP_MINUTES").pipe(Config.withDefault(60)),
       };

@@ -8,7 +8,7 @@
  */
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Drizzle from "alchemy/Drizzle/D1";
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Option } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 
 import { handleRequest } from "./Api.ts";
@@ -26,6 +26,8 @@ import { runTick } from "./Tick.ts";
 const ZONE = "danolekh.com";
 const INBOX = `jobs@${ZONE}`;
 const WORKER_NAME = "growth";
+/** Where a copy of direct mail to jobs@ goes, so Dan has a real inbox for it. Must be verified once. */
+const ARCHIVE_ADDRESS = "danyaolekhq@gmail.com";
 
 export default Cloudflare.Worker(
   WORKER_NAME,
@@ -44,6 +46,7 @@ export default Cloudflare.Worker(
     });
     const namespace = yield* Cloudflare.KV.Namespace("growth-kv");
     yield* Cloudflare.Email.Routing("jobs-routing", { zone: ZONE });
+    yield* Cloudflare.Email.Address("jobs-archive", { email: ARCHIVE_ADDRESS });
     yield* Cloudflare.Email.Rule("jobs-rule", {
       zone: ZONE,
       name: `${INBOX} → ${WORKER_NAME}`,
@@ -88,7 +91,18 @@ export default Cloudflare.Worker(
     yield* onEmail((message) => {
       const allowed = settings.inboundAllow.length === 0 || settings.inboundAllow.some((d) => message.from.toLowerCase().endsWith(d));
       if (!allowed) return Effect.logInfo("mail dropped: sender not allowed", { from: message.from });
-      return parseMail(message.raw as any).pipe(
+      // Mail that did not come through Gmail's forwarding (recruiters writing to jobs@ directly)
+      // is copied to the archive address so it has a human-readable inbox. Forwarded alerts are
+      // already in Gmail; copying them back would loop through the forwarding filter.
+      const viaGmail = /gmail\.com|googlemail\.com/i.test(message.from);
+      const archiveTo = Option.getOrUndefined(settings.mailArchiveTo);
+      const archive = archiveTo && !viaGmail
+        ? Effect.tryPromise(() => message.forward(archiveTo)).pipe(
+            Effect.catch((err) => Effect.logWarning("archive forward failed (destination verified?)", { err: String(err) })),
+          )
+        : Effect.void;
+      return archive.pipe(
+        Effect.andThen(parseMail(message.raw as any)),
         Effect.flatMap((mail) => ingestMail(mail)),
         Effect.catchCause((cause) => Effect.logError("email failed", { cause: String(cause) })),
         Effect.provideContext(services),

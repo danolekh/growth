@@ -44,9 +44,11 @@ export class Routine extends Context.Service<
             yield* Effect.logInfo("fire skipped: too soon after the last one", { last, reason });
             return false;
           }
+          // The /fire endpoint is a research-preview beta; both headers are required.
           yield* HttpClientRequest.post(settings.fireUrl.value).pipe(
             HttpClientRequest.bearerToken(Redacted.value(settings.fireToken.value)),
-            HttpClientRequest.bodyJsonUnsafe({ reason }),
+            HttpClientRequest.setHeaders({ "anthropic-beta": "experimental-cc-routine-2026-04-01", "anthropic-version": "2023-06-01" }),
+            HttpClientRequest.bodyJsonUnsafe({ text: `growth fired the routine: ${reason}` }),
             client.execute,
             Effect.flatMap(HttpClientResponse.filterStatusOk),
             Effect.timeout("15 seconds"),
