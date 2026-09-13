@@ -29,6 +29,9 @@ export class Settings extends Context.Service<
     readonly mailArchiveTo: Option.Option<string>;
     readonly maxFiresPerDay: number;
     readonly minFireGapMinutes: number;
+    /** Total (out of 20) at or above which a job is an apply / apply-low; tune from the summary data. */
+    readonly scoreApplyMin: number;
+    readonly scoreLowMin: number;
   }
 >()("growth/Settings") {
   static readonly layer = Layer.effect(Settings)(
@@ -52,6 +55,8 @@ export class Settings extends Context.Service<
         mailArchiveTo: yield* Config.option(Config.nonEmptyString("MAIL_ARCHIVE_TO")),
         maxFiresPerDay: yield* Config.number("MAX_FIRES_PER_DAY").pipe(Config.withDefault(6)),
         minFireGapMinutes: yield* Config.number("MIN_FIRE_GAP_MINUTES").pipe(Config.withDefault(60)),
+        scoreApplyMin: yield* Config.number("SCORE_APPLY_MIN").pipe(Config.withDefault(15)),
+        scoreLowMin: yield* Config.number("SCORE_LOW_MIN").pipe(Config.withDefault(12)),
       };
     }),
   );

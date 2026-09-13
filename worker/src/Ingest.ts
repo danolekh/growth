@@ -18,6 +18,8 @@ import {
   type JobDetail,
 } from "./Djinni.ts";
 import type { ExtractedJob } from "./Email.ts";
+import { fetchLatestThread, fetchPage } from "./HackerNews.ts";
+import { Kv } from "./Kv.ts";
 import { HttpClient } from "effect/unstable/http";
 import { now, Repo, type DraftRow, type JobRow, type NewJob, type ScoreRow } from "./Repo.ts";
 import { detectLanguage, Scorer, type ScoreInput } from "./Scorer.ts";
@@ -88,6 +90,56 @@ export const ingestDjinniKeyword = Effect.fn("Ingest.djinniKeyword")(function* (
   }
   if (rows.length) yield* repo.insertJobs(rows);
   return { keyword, feed: items.length, fresh: fresh.length, inserted: rows.length, kept: rows.length - skipped };
+});
+
+/**
+ * One page of the current "Who is hiring?" thread per call. The thread id is cached per month;
+ * pages are walked with a KV cursor, and page 0 (newest first) comes around again after a full
+ * walk so late comments are picked up. Posts land as `enriched` (no page to fetch) and score next.
+ */
+export const ingestHackerNews = Effect.fn("Ingest.hackerNews")(function* () {
+  const client = yield* HttpClient.HttpClient;
+  const repo = yield* Repo;
+  const kv = yield* Kv;
+  const month = new Date().toISOString().slice(0, 7);
+  let threadId = yield* kv.get(`hn:thread:${month}`);
+  if (!threadId) {
+    const thread = yield* fetchLatestThread(client);
+    if (!thread) return { thread: null, page: -1, inserted: 0 };
+    threadId = thread.id;
+    yield* kv.put(`hn:thread:${month}`, threadId, 40 * 86400);
+    yield* kv.put("hn:page", "0");
+  }
+  const page = Number((yield* kv.get("hn:page")) ?? 0);
+  const result = yield* fetchPage(client, threadId, page);
+  const seen = yield* repo.existingJobIds(result.posts.map((p) => `hn:${p.id}`));
+  const rows: NewJob[] = [];
+  for (const p of result.posts) {
+    const id = `hn:${p.id}`;
+    if (seen.has(id)) continue;
+    const skip = p.flags.includes("us-only") || p.flags.includes("onsite");
+    rows.push({
+      id,
+      source: "hn",
+      externalId: p.id,
+      url: p.url,
+      title: p.title,
+      description: p.text,
+      postedAt: p.createdAt,
+      firstSeenAt: now(),
+      updatedAt: now(),
+      keywords: JSON.stringify([`hn:${threadId}`]),
+      flags: JSON.stringify(p.flags),
+      filterReason: skip ? (p.flags.includes("us-only") ? "us-only" : "onsite") : null,
+      status: skip ? "skipped" : "enriched",
+      hot: p.flags.includes("niche-stack") ? 1 : 0,
+      detail: JSON.stringify({ detail_error: "hn-comment", work_format: "Remote" }),
+    });
+  }
+  if (rows.length) yield* repo.insertJobs(rows);
+  const next = result.pages > 0 ? (page + 1) % result.pages : 0;
+  yield* kv.put("hn:page", String(next));
+  return { thread: threadId, page, pages: result.pages, kept: result.posts.length, inserted: rows.length };
 });
 
 /** Jobs that arrived by email already carry all we will ever know; they skip the page fetch. */

@@ -82,7 +82,7 @@ const userPrompt = (input: ScoreInput) =>
 
 const clamp = (n: unknown): number => Math.min(5, Math.max(1, Math.round(Number(n) || 1)));
 
-const parseResult = (raw: unknown, model: string, language: "en" | "uk"): ScoreResult => {
+const parseResult = (raw: unknown, model: string, language: "en" | "uk", applyMin: number, lowMin: number): ScoreResult => {
   let obj: any = raw;
   if (obj && typeof obj === "object" && "response" in obj) obj = obj.response;
   if (typeof obj === "string") {
@@ -96,7 +96,7 @@ const parseResult = (raw: unknown, model: string, language: "en" | "uk"): ScoreR
   const total = skills_fit + winnability + stackability + signal;
   const noOnes = Math.min(skills_fit, winnability, stackability, signal) > 1;
   const verdict: ScoreResult["verdict"] =
-    total >= 15 && noOnes ? "apply" : total >= 12 && skills_fit >= 3 ? "apply-low" : "skip";
+    total >= applyMin && noOnes ? "apply" : total >= lowMin && skills_fit >= 3 ? "apply-low" : "skip";
   return { skills_fit, winnability, stackability, signal, total, verdict, language, summary: String(obj.summary ?? "").slice(0, 400), model };
 };
 
@@ -123,7 +123,7 @@ export class Scorer extends Context.Service<
             max_tokens: 400,
           } as any)
           .pipe(Effect.mapError((cause) => ScoreError.make({ model, cause })));
-        return yield* Effect.try({ try: () => parseResult(raw, model, input.language), catch: (cause) => ScoreError.make({ model, cause }) });
+        return yield* Effect.try({ try: () => parseResult(raw, model, input.language, settings.scoreApplyMin, settings.scoreLowMin), catch: (cause) => ScoreError.make({ model, cause }) });
       });
 
       const viaOpenRouter = Effect.fn("Scorer.openRouter")(function* (key: Redacted.Redacted<string>, input: ScoreInput) {
@@ -145,7 +145,7 @@ export class Scorer extends Context.Service<
           Effect.mapError((cause) => ScoreError.make({ model: OPENROUTER_MODEL, cause })),
         );
         return yield* Effect.try({
-          try: () => parseResult(json?.choices?.[0]?.message?.content, OPENROUTER_MODEL, input.language),
+          try: () => parseResult(json?.choices?.[0]?.message?.content, OPENROUTER_MODEL, input.language, settings.scoreApplyMin, settings.scoreLowMin),
           catch: (cause) => ScoreError.make({ model: OPENROUTER_MODEL, cause }),
         });
       });
