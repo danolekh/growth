@@ -32,6 +32,18 @@ describe("Hacker News who is hiring", () => {
     expect(boss?.title).toContain("https://boss-iq.com");
   });
 
+  test("treats Remote (US) and Remote, USA as US-only unless the post opens the region", () => {
+    const p = parsePage(page0, "49522897");
+    const ours = p.posts.find((x) => x.title.startsWith("Ours Privacy"));
+    expect(ours?.flags).toContain("us-only");
+    const albert = p.posts.find((x) => x.title.startsWith("ALBERT"));
+    expect(albert?.flags).toContain("open-region");
+    expect(albert?.flags).not.toContain("us-only");
+    const kv = p.posts.find((x) => x.title.startsWith("Location:"));
+    expect(kv?.title ?? "Location: x · y").toContain("·");
+    expect(kv?.company ?? null).toBeNull();
+  });
+
   test("flags US-only remote posts and open-region ones", () => {
     const p = parsePage(page0, "49522897");
     const usOnly = p.posts.filter((x) => x.flags.includes("us-only"));

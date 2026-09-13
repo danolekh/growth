@@ -45,8 +45,9 @@ export const parseThread = (json: any): HnThread | null => {
 
 const STACK = /\b(typescript|react|next\.?js|node(\.js)?|tanstack|effect[- ]?ts|astro|remix|bun|drizzle|postgres)\b/i;
 const REMOTE = /\bremote\b/i;
-const US_ONLY = /\b(us[- ]only|us[- ]based( only)?|united states only|\(us\)|us time ?zones?|us citizens?|north america only|canada\/us only)\b/i;
-const OPEN = /\b(worldwide|anywhere|global|europe|eu\b|emea|cet|cest|utc[+-]|international)\b/i;
+// No outer \b: several alternatives start or end with punctuation, which has no word boundary.
+const US_ONLY = /(\bus[- ]only\b|\bus[- ]based\b|\bunited states\b|\(\s*usa?\s*(?:only|time ?zones?|based)?\s*\)|\bus time ?zones?\b|\bus citizens?\b|\bnorth america\b|remote,?\s*usa?\b|\busa\b|\bus\/canada\b|\bcanada\/us\b)/i;
+const OPEN = /(\bworldwide\b|\banywhere\b|\bglobal(ly)?\b|\beurope(an)?\b|\beu\b|\bemea\b|\bcet\b|\bcest\b|utc\s*[+-]|\binternational\b|\bukraine\b|\baustria\b|\bgermany\b|\buk\b)/i;
 const ONSITE_ONLY = /\bonsite\b(?![^|]*remote)/i;
 
 /** Top-level comments of the thread on one page, filtered to the stack and to remote roles. */
@@ -56,10 +57,13 @@ export const parsePage = (json: any, threadId: string): HnPage => {
     if (String(h.parent_id) !== String(threadId) || !h.comment_text) continue;
     const text = toText(decode(String(h.comment_text)));
     if (!STACK.test(text) || !REMOTE.test(text)) continue;
-    const firstLine = text.split("\n")[0]?.trim() ?? "";
-    const title = (firstLine.length > 8 ? firstLine : text.slice(0, 100)).slice(0, 120);
+    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const firstLine = lines[0] ?? "";
+    // Some posts use a "Location: … / Remote: … / Technologies: …" form; the headline is then the body.
+    const keyValueForm = /^(location|remote|willing to relocate|technologies|technology|visa)\s*:/i.test(firstLine);
+    const title = (keyValueForm ? lines.slice(0, 4).join(" · ") : firstLine.length > 8 ? firstLine : text.slice(0, 100)).slice(0, 120);
     const segments = firstLine.split("|").map((s) => s.trim()).filter(Boolean);
-    const company = segments.length > 1 && segments[0]!.length <= 60 ? segments[0]!.replace(/\s*\(.*?\)\s*$/, "") : null;
+    const company = !keyValueForm && segments.length > 1 && segments[0]!.length <= 60 ? segments[0]!.replace(/\s*\(.*?\)\s*$/, "") : null;
     const flags = ["hn"];
     const usOnly = US_ONLY.test(text) && !OPEN.test(text);
     if (usOnly) flags.push("us-only");
