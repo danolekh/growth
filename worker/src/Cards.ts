@@ -71,9 +71,21 @@ export const noDraftKeyboard = (jobId: string): InlineButton[][] => [
   ],
 ];
 
-export const sentKeyboard = (applicationId: string): InlineButton[][] => [
+export const sentKeyboard = (applicationId: string, draftId: string, url: string): InlineButton[][] => [
+  [
+    { text: "📎 Resume PDF", callback_data: `p:${draftId}` },
+    { text: "🔗 Open the post", url },
+  ],
   [{ text: "↩️ Didn't send", callback_data: `n:${applicationId}` }],
 ];
+
+/**
+ * The whole apply package in one message: the card header, the text to paste inside a
+ * copyable block, and the form settings. Telegram caps a message at 4096 characters; the
+ * caller falls back to separate messages when the package is longer.
+ */
+export const applyPackage = (header: string, message: string, form: string): string =>
+  [`✅ <b>Applying</b>`, header, "", "<b>Paste this</b> (tap the block to copy):", `<pre>${escapeHtml(message)}</pre>`, "", form].join("\n");
 
 export const replyKeyboard = (messageId: string): InlineButton[][] => [
   [{ text: "✍️ Draft a reply", callback_data: `r:${messageId}` }],

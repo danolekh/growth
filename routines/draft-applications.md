@@ -62,6 +62,11 @@ For each `application` item:
    one plain paragraph; hyphens not em-dashes; no "X, not Y" flourishes; no labeled-list
    sentences; only claim what `me/skills.md` and `me/experience.md` support. Location is Vienna,
    EU time zone; mention it for EU/Western employers, omit it for Ukrainian companies.
+   Discord posts (source `effect`, or any job whose url is a discord.com link): `message` is a
+   direct message to the poster, under 900 characters, first line names their product, ends
+   with one concrete question; put a 2–3 sentence public thread reply into `formNotes` for the
+   case where their DMs are closed. `salaryAsk` is a short value only, e.g. `$2,000`,
+   `€48-55k/yr`, or `leave blank`; never a sentence.
 5. POST the draft:
 ```
 curl -s -X POST -H "Authorization: Bearer {{ROUTINE_TOKEN}}" -H "content-type: application/json" \

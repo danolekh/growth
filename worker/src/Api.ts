@@ -7,7 +7,7 @@ import { Effect, Option, Redacted, Schema } from "effect";
 import { HttpServerResponse } from "effect/unstable/http";
 
 import { Background } from "./Bindings.ts";
-import { draftKeyboard, formSettingsText, sentKeyboard } from "./Cards.ts";
+import { applyPackage, draftKeyboard, formSettingsText, sentKeyboard } from "./Cards.ts";
 import { BadRequest } from "./Errors.ts";
 import { cardFor, cardPendingDrafts, ingestDjinniKeyword, jobDetail } from "./Ingest.ts";
 import { Kv } from "./Kv.ts";
@@ -130,15 +130,35 @@ const onApply = Effect.fn("Api.onApply")(function* (draftId: string) {
   yield* repo.updateJob(job.id, { status: "applied" });
   yield* repo.insertEvent({ jobId: job.id, draftId: draft.id, kind: "apply", at: now() });
 
-  if (draft.tgMessageId) yield* telegram.edit(draft.tgMessageId, `✅ <b>Applying</b>\n${card}`, { keyboard: sentKeyboard(appId) });
-  yield* telegram.send(escapeHtml(draft.message), { disablePreview: true });
-  yield* telegram.send(formSettingsText(draft));
-  const variant = draft.resumeVariant ?? "fullstack";
+  // One message, edited in place: header, copyable text, form settings, and buttons for the
+  // PDF and the post. Falls back to separate messages only when the package is too long.
+  const keyboard = sentKeyboard(appId, draft.id, job.url);
+  const header = card.split("\n").slice(0, 3).join("\n");
+  const pkg = applyPackage(header, draft.message, formSettingsText(draft));
+  const fits = pkg.length <= 4000;
+  const edited = draft.tgMessageId && fits
+    ? yield* telegram.edit(draft.tgMessageId, pkg, { keyboard }).pipe(Effect.as(true), Effect.catch(() => Effect.succeed(false)))
+    : false;
+  if (!edited) {
+    if (draft.tgMessageId) yield* telegram.edit(draft.tgMessageId, `✅ <b>Applying</b>\n${header}`, { keyboard }).pipe(Effect.ignore);
+    yield* telegram.send(`<pre>${escapeHtml(draft.message)}</pre>`, { disablePreview: true });
+    yield* telegram.send(formSettingsText(draft));
+  }
+  yield* kv.put(`sent:${draft.id}`, "1", 7 * 86400);
+  return fits ? "Card updated with the text" : "Sent the text as separate messages";
+});
+
+/** The resume PDF for a draft's variant, on demand. */
+const onResume = Effect.fn("Api.onResume")(function* (draftId: string) {
+  const repo = yield* Repo;
+  const telegram = yield* Telegram;
+  const kv = yield* Kv;
+  const draft = yield* repo.draftById(draftId);
+  const variant = draft?.resumeVariant ?? "fullstack";
   const fileId = yield* kv.get(`tg:file:${variant}`);
-  if (fileId) yield* telegram.sendDocument(fileId, `Resume · ${escapeHtml(variant)}`);
-  else yield* telegram.send(`No resume file registered for <b>${escapeHtml(variant)}</b>. Run scripts/upload-resumes.ts.`);
-  yield* telegram.send(`<a href="${escapeHtml(job.url)}">Open the post and send</a>`, { disablePreview: false });
-  return "Sent you everything";
+  if (!fileId) return `No resume file registered for ${variant}. Run scripts/upload-resumes.ts.`;
+  yield* telegram.sendDocument(fileId, `Resume · ${escapeHtml(variant)}`);
+  return "Sent";
 });
 
 const onSkip = Effect.fn("Api.onSkip")(function* (draftId: string) {
@@ -257,6 +277,8 @@ const callbackAction = (kind: string, id: string): Effect.Effect<string, unknown
       return onJobSkip(id);
     case "n":
       return onNotSent(id);
+    case "p":
+      return onResume(id);
     case "r":
       return onReplyRequest(id);
     default:
