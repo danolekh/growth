@@ -34,3 +34,34 @@ Portfolio: danolekh.com · GitHub: github.com/danolekh
 - **CV:** `me/resume/out/Resume-fullstack.pdf`
 - **Timing:** posted 7 Sep, 143 applications already. Send today anyway, the stack fit is
   strong enough to be worth the shot despite the crowd.
+
+## Screening answers
+
+**Please describe your commercial experience with Supabase. What have you used it for in your
+projects?**
+
+I haven't used Supabase specifically in a commercial project. My relational database work has
+gone through Postgres directly, mostly with Drizzle ORM: hand-rolled schemas, migrations, and
+query work in production, most recently on a live iGaming platform (wallets, bonuses, GEO rules)
+and on my own e-commerce build, Azulejo. Supabase sits on top of Postgres and adds auth and
+realtime on top, so the core data modeling and migration work transfers directly. I'd expect the
+ramp to be short, learning Supabase's auth and client conventions rather than the relational
+thinking underneath.
+
+**Please describe your experience with Zustand. What kind of state have you managed with it?**
+
+Zustand is part of my regular toolkit on the frontend. I've used it for client-side UI state that
+doesn't belong in the URL or a data-fetching cache: things like cart state, filter and modal
+state, and form-adjacent UI state alongside TanStack Query handling the server data. I keep stores
+small and scoped to one concern rather than one global store, and pair it with selectors so
+components only re-render on the slice of state they actually use.
+
+**Do you have commercial experience with a headless or traditional CMS? If yes, which CMS
+platforms have you worked with?**
+
+Yes. I've run Strapi in production: deployed on Railway with Postgres and an object storage
+bucket, multi-locale content (i18n), role-based access for Admin and Editor users, public
+read-only API permissions, and content modeling built from a schema the client provided. I also
+work with Strapi's block-based content rendering on my own site, Azulejo, including search and
+pagination over article content. I haven't used a traditional CMS like WordPress commercially,
+only Strapi as the headless option.
