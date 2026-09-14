@@ -55,6 +55,14 @@ src/Db.ts             repository over Drizzle; schema in src/db/schema.ts; SQL i
 - Bot commands: `/ping`, `/summary`, `/queue`, `/fire`, `/stage <applicationId> <stage>`,
   `/questions <draftId> <questions…>`.
 
+## When drafting happens
+Every scored job with an apply verdict goes into the routine's queue. The routine runs on its own
+cron (`ROUTINE_CRON_HOURS_UTC`, default 05/08/11/14/17 UTC = 07:00, 10:00, 13:00, 16:00, 19:00
+Vienna) and drafts everything queued. On top of that the Worker fires it on demand when a hot job
+is waiting, a reply came in, questions were pasted, or you tap **Draft it**, at most
+`MAX_FIRES_PER_DAY` times per Vienna day with `MIN_FIRE_GAP_MINUTES` between fires. Each card and
+each "Queued for drafting" edit says which of the two will pick it up.
+
 ## Apply flow (one message per job, edited in place)
 1. A card arrives: title, pay, flags, score, the buttons **Apply / Later / Skip** (or **Draft it**
    when the routine has not written the text yet).

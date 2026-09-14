@@ -23,6 +23,7 @@ import { EFFECT_JOBS_URL, fetchEffectJobs } from "./EffectJobs.ts";
 import { fetchLatestThread, fetchPage } from "./HackerNews.ts";
 import { Kv } from "./Kv.ts";
 import { Settings } from "./Settings.ts";
+import { nextCronLocal } from "./Time.ts";
 import { HttpClient } from "effect/unstable/http";
 import { now, Repo, type DraftRow, type JobRow, type NewJob, type ScoreRow } from "./Repo.ts";
 import { detectLanguage, Scorer, type ScoreInput } from "./Scorer.ts";
@@ -360,11 +361,14 @@ export const scoreEnriched = Effect.fn("Ingest.scoreEnriched")(function* (limit:
 export const cardScored = Effect.fn("Ingest.cardScored")(function* (limit: number) {
   const repo = yield* Repo;
   const telegram = yield* Telegram;
+  const settings = yield* Settings;
   const rows = yield* repo.jobsWithoutCard(limit);
+  const next = nextCronLocal(settings.routineCronHoursUtc);
+  const footer = `⏳ Drafted at the ${next.label} run${next.tomorrow ? " tomorrow" : ""}; Draft it = now.`;
   let sent = 0;
   for (const { job, score } of rows) {
     const messageId = yield* telegram
-      .send(cardFor(job, score, null), { keyboard: noDraftKeyboard(job.id), silent: job.hot !== 1 })
+      .send(`${cardFor(job, score, null)}\n${footer}`, { keyboard: noDraftKeyboard(job.id), silent: job.hot !== 1 })
       .pipe(Effect.catch((err) => Effect.logWarning("card send failed", { err: String(err) }).pipe(Effect.as(-1))));
     if (messageId > 0) {
       yield* repo.updateJob(job.id, { tgMessageId: messageId });

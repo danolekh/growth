@@ -31,6 +31,8 @@ export class Settings extends Context.Service<
     readonly djinniSession: Option.Option<Redacted.Redacted<string>>;
     readonly maxFiresPerDay: number;
     readonly minFireGapMinutes: number;
+    /** UTC hours of the routine's own cron, so cards can say when the next scheduled run is. */
+    readonly routineCronHoursUtc: ReadonlyArray<number>;
     /** Total (out of 20) at or above which a job is an apply / apply-low; tune from the summary data. */
     readonly scoreApplyMin: number;
     readonly scoreLowMin: number;
@@ -58,6 +60,10 @@ export class Settings extends Context.Service<
         djinniSession: yield* Config.option(Config.redacted("DJINNI_SESSION")),
         maxFiresPerDay: yield* Config.number("MAX_FIRES_PER_DAY").pipe(Config.withDefault(6)),
         minFireGapMinutes: yield* Config.number("MIN_FIRE_GAP_MINUTES").pipe(Config.withDefault(60)),
+        routineCronHoursUtc: (yield* Config.string("ROUTINE_CRON_HOURS_UTC").pipe(Config.withDefault("5,8,11,14,17")))
+          .split(",")
+          .map((s) => Number(s.trim()))
+          .filter((n) => Number.isInteger(n) && n >= 0 && n < 24),
         scoreApplyMin: yield* Config.number("SCORE_APPLY_MIN").pipe(Config.withDefault(15)),
         scoreLowMin: yield* Config.number("SCORE_LOW_MIN").pipe(Config.withDefault(12)),
       };

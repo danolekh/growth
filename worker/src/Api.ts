@@ -240,7 +240,7 @@ const onQuestionsReply = Effect.fn("Api.onQuestionsReply")(function* (draftId: s
   if (!moved) return "That draft is closed";
   yield* repo.insertEvent({ draftId, kind: "questions", payload: JSON.stringify(questions), at: now() });
   const fired = yield* routine.fire(`questions for ${draftId}`);
-  yield* telegram.send(`Got ${questions.length} question${questions.length > 1 ? "s" : ""}. ${fired ? "The routine is answering now." : "Answers come with the next routine run."}`, { silent: true });
+  yield* telegram.send(`Got ${questions.length} question${questions.length > 1 ? "s" : ""}. ${routine.explain(fired)}`, { silent: true });
   return "Queued";
 });
 
@@ -291,9 +291,10 @@ const onDraftRequest = Effect.fn("Api.onDraftRequest")(function* (jobId: string)
   if (score && score.verdict === "skip") yield* repo.upsertScore({ ...score, verdict: "apply-low" });
   if (job.status !== "scored") yield* repo.updateJob(job.id, { status: "scored" });
   yield* repo.insertEvent({ jobId: job.id, kind: "draft-request", at: now() });
-  if (job.tgMessageId) yield* telegram.edit(job.tgMessageId, `✍️ Queued for drafting\n${escapeHtml(job.title)}`);
   const fired = yield* routine.fire(`draft requested for ${job.id}`);
-  return fired ? "Queued and the routine is running" : "Queued for the next routine run";
+  const when = routine.explain(fired);
+  if (job.tgMessageId) yield* telegram.edit(job.tgMessageId, `✍️ Queued for drafting\n${escapeHtml(job.title)}\n${when}`).pipe(Effect.ignore);
+  return fired.fired ? "Drafting now" : "Queued; see the card for when";
 });
 
 const onJobSkip = Effect.fn("Api.onJobSkip")(function* (jobId: string) {
@@ -327,7 +328,7 @@ const onReplyRequest = Effect.fn("Api.onReplyRequest")(function* (messageId: str
   const msg = yield* repo.messageById(messageId);
   if (!msg) return "Message not found";
   yield* repo.insertDraft({ id: newId(), jobId: msg.jobId, kind: "reply", message: "", messageId, status: "requested", createdAt: now() });
-  const fired = yield* routine.fire(`reply requested for ${messageId}`);
+  const fired = (yield* routine.fire(`reply requested for ${messageId}`)).fired;
   return fired ? "Routine is drafting the reply" : "Reply queued for the next routine run";
 });
 
@@ -349,7 +350,7 @@ const onCommand = Effect.fn("Api.onCommand")(function* (chatId: string, textIn: 
       return waiting.map((w) => `${w.job.hot ? "🔥 " : ""}${escapeHtml(w.job.title)} · ${escapeHtml(w.job.company ?? "?")} · ${w.score.total}/20`).join("\n");
     }
     case "/fire":
-      return (yield* routine.fire("manual /fire")) ? "Fired." : "Not fired (budget, gap, or not configured).";
+      return routine.explain(yield* routine.fire("manual /fire"));
     case "/questions": {
       const [draftId, ...q] = rest;
       if (!draftId || !q.length) return "Usage: /questions <draftId> <questions, one per line>";
@@ -503,6 +504,11 @@ const acceptDraft = Effect.fn("Api.acceptDraft")(function* (body: typeof DraftBo
 
   if (kind === "skip" && jobId) {
     yield* repo.updateJob(jobId, { status: "skipped", filterReason: `routine: ${formNotes ?? ""}`.slice(0, 200) });
+    const job = yield* repo.jobById(jobId);
+    if (job?.tgMessageId)
+      yield* telegram
+        .edit(job.tgMessageId, `⛔ <s>${escapeHtml(job.title)}</s>\nSkipped by the routine: ${escapeHtml((formNotes ?? "no reason given").slice(0, 300))}`)
+        .pipe(Effect.ignore);
     return { ok: true };
   }
   if (kind === "reply") {

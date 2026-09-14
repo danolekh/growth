@@ -10,13 +10,19 @@ import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstab
 import { Kv } from "./Kv.ts";
 import { Repo } from "./Repo.ts";
 import { Settings } from "./Settings.ts";
-import { localTime } from "./Time.ts";
+import { localTime, nextCronLocal } from "./Time.ts";
+
+export type FireResult =
+  | { readonly fired: true }
+  | { readonly fired: false; readonly reason: "unconfigured" | "budget" | "gap" | "failed" };
 
 export class Routine extends Context.Service<
   Routine,
   {
-    /** True when a fire was actually sent. Never fails: a fire is best effort. */
-    readonly fire: (reason: string) => Effect.Effect<boolean, never, RuntimeContext>;
+    /** Never fails: a fire is best effort. The result says why it did not happen. */
+    readonly fire: (reason: string) => Effect.Effect<FireResult, never, RuntimeContext>;
+    /** One plain sentence for a card: when the draft will actually be written. */
+    readonly explain: (result: FireResult, at?: Date) => string;
   }
 >()("growth/Routine") {
   static readonly layer = Layer.effect(Routine)(
@@ -30,19 +36,19 @@ export class Routine extends Context.Service<
         function* (reason: string) {
           if (Option.isNone(settings.fireUrl) || Option.isNone(settings.fireToken)) {
             yield* Effect.logInfo("fire skipped: routine fire endpoint not configured", { reason });
-            return false;
+            return { fired: false, reason: "unconfigured" } as const;
           }
           const local = localTime();
           const countKey = `fire:count:${local.date}`;
           const used = Number((yield* kv.get(countKey)) ?? 0);
           if (used >= settings.maxFiresPerDay) {
             yield* Effect.logInfo("fire skipped: daily budget used", { used, reason });
-            return false;
+            return { fired: false, reason: "budget" } as const;
           }
           const last = yield* kv.get("fire:last");
           if (last && Date.now() - new Date(last).getTime() < settings.minFireGapMinutes * 60_000) {
             yield* Effect.logInfo("fire skipped: too soon after the last one", { last, reason });
-            return false;
+            return { fired: false, reason: "gap" } as const;
           }
           // The /fire endpoint is a research-preview beta; both headers are required.
           yield* HttpClientRequest.post(settings.fireUrl.value).pipe(
@@ -57,12 +63,28 @@ export class Routine extends Context.Service<
           yield* kv.put("fire:last", new Date().toISOString());
           yield* repo.insertEvent({ kind: "fire", payload: JSON.stringify({ reason }), at: new Date().toISOString() });
           yield* Effect.logInfo("routine fired", { reason });
-          return true;
+          return { fired: true } as const;
         },
-        Effect.catch((err) => Effect.logWarning("fire failed", { err: String(err) }).pipe(Effect.as(false))),
+        Effect.catch((err) =>
+          Effect.logWarning("fire failed", { err: String(err) }).pipe(Effect.as({ fired: false, reason: "failed" } as const)),
+        ),
       );
 
-      return { fire };
+      const explain = (result: FireResult, at: Date = new Date()): string => {
+        const next = nextCronLocal(settings.routineCronHoursUtc, at);
+        const run = `the ${next.label} run${next.tomorrow ? " tomorrow" : ""}`;
+        if (result.fired) return "⏳ Drafting now, about five minutes.";
+        switch (result.reason) {
+          case "gap":
+            return `⏳ Next attempt within the hour, at the latest ${run}.`;
+          case "budget":
+            return `⏳ Today's ${settings.maxFiresPerDay} on-demand runs are used; drafted at ${run}.`;
+          default:
+            return `⏳ Drafted at ${run}.`;
+        }
+      };
+
+      return { fire, explain };
     }),
   );
 }

@@ -26,6 +26,27 @@ export const localTime = (at: Date = new Date()): LocalTime => {
   return { date, hour: p.hour, minute: p.minute, weekday: p.weekDay, isoWeek: isoWeekOf(date) };
 };
 
+/**
+ * The next scheduled routine run as Vienna wall-clock, given the routine's cron hours in UTC.
+ * `tomorrow` is set when no slot is left today (local date).
+ */
+export const nextCronLocal = (hoursUtc: ReadonlyArray<number>, at: Date = new Date()): { label: string; tomorrow: boolean } => {
+  const hours = [...new Set(hoursUtc)].sort((a, b) => a - b);
+  if (hours.length === 0) return { label: "?", tomorrow: false };
+  const t = new Date(at);
+  t.setUTCMinutes(0, 0, 0);
+  const todayLocal = localTime(at).date;
+  for (let step = 0; step < 48; step++) {
+    const h = (t.getUTCHours() + step) % 24;
+    const candidate = new Date(t.getTime() + step * 3_600_000);
+    if (hours.includes(h) && candidate.getTime() > at.getTime()) {
+      const local = localTime(candidate);
+      return { label: `${pad(local.hour)}:${pad(local.minute)}`, tomorrow: local.date !== todayLocal };
+    }
+  }
+  return { label: "?", tomorrow: false };
+};
+
 /** ISO-8601 week label for a YYYY-MM-DD date (already local, so computed in UTC arithmetic). */
 export const isoWeekOf = (date: string): string => {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
