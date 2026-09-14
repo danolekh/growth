@@ -6,7 +6,7 @@ https://jobs.ashbyhq.com/Mastra/05172cb0-47ec-44f9-9fe8-07d4...
 ## Message (send this)
 
 The half of this role about shipping fixes into someone else's codebase and getting them merged
-is something I already have a track record in outside my day job - merged PRs to opentui (the
+is something I already have a track record in - merged PRs to opentui (the
 terminal UI library opencode is built on) and code-racer, where I was a top contributor in 2023.
 I like that kind of work: read the real code, find the actual bug, keep the fix small.
 

@@ -9,8 +9,7 @@ including the LLM pipeline at the core of the product. So the Effect line on you
 daily work for me, not a resume keyword.
 
 I don't have industrial or climate-tech domain experience, so that side would be new. The closest
-thing I can point to on the "growth engine" side is the money-correctness work I do now at
-Renewator, an iGaming platform: idempotent withdrawals keyed on the ledger index, bonus expiry and
+thing I can point to on the "growth engine" side is the money-correctness work I shipped recently on a live iGaming platform: idempotent withdrawals keyed on the ledger index, bonus expiry and
 debit in a single statement, abuse limits on issuance - the kind of logic where a financial engine
 can't be wrong. It's not the same industry, but it's the same discipline.
 

@@ -9,8 +9,7 @@ I run Effect.ts in production, typed errors and layers included - I built Quextr
 solo on Bun, Effect and Drizzle ORM, so the FP background your card asks for is daily work, not
 theory.
 
-I'm not in fintech specifically, but the closest thing I ship today is the same discipline under
-real financial stakes: at Renewator, an iGaming platform, I do idempotent withdrawals keyed on the
+I'm not in fintech specifically, but the closest thing I've shipped recently is the same discipline under real financial stakes: on a live iGaming platform I built idempotent withdrawals keyed on the
 ledger index, single-statement bonus expiry with debit, and abuse limits on issuance. It's money
 that has to come out right every time, which is the part of fintech work I'd guess matters most to
 you.

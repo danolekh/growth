@@ -62,7 +62,10 @@ For each `application` item:
    Voice: first two lines carry the job-specific hook, no greeting padding; name honest gaps in
    one plain paragraph; hyphens not em-dashes; no "X, not Y" flourishes; no labeled-list
    sentences; only claim what `me/skills.md` and `me/experience.md` support. Location is Vienna,
-   EU time zone; mention it for EU/Western employers, omit it for Ukrainian companies.
+   EU time zone; mention it for EU/Western employers, omit it for Ukrainian companies. Never
+   mention a current job, day job, employer or other clients, and never write about the iGaming
+   platform work in the present tense: it is recent contract work, described in the past tense,
+   company unnamed unless the post asks for references.
    Discord posts (source `effect` or `discord`, or any job whose url is a discord.com link):
    `message` is a direct message to the poster, under 900 characters, first line names their
    product, ends with one concrete question; put a 2–3 sentence public thread reply into

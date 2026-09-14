@@ -151,4 +151,6 @@ costs little to promise.
 - Walls of text. Restating the job back without adding anything.
 - Underpricing to win — it signals low quality and attracts bad clients.
 - Promising stacks/skills not in `me/skills.md`.
+- Mentioning a current job, day job, employer or other clients (added 2026-09-14: Dan reads it as
+  a red flag). Past work is described in the past tense; availability is stated, not explained.
 - Ignoring an explicit requirement in the post (the client will notice).

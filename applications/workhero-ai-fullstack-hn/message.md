@@ -7,9 +7,7 @@ news.ycombinator.com/item?id=49524167 before sending.
 ## Message (send this)
 
 Your split of the job, AI-native React experiences on one side and the Node services and agent
-workflows behind them on the other, is close to how my current work is split too. I ship across
-six Node microservices for a live iGaming platform (Express, Drizzle, Postgres, Redis, Docker,
-GitLab CI) and a React admin UI on top of them, so the frontend and backend halves aren't
+workflows behind them on the other, is close to how my recent work was split too. On a live iGaming platform I shipped across six Node microservices (Express, Drizzle, Postgres, Redis, Docker, GitLab CI) and a React admin UI on top of them, so the frontend and backend halves aren't
 separate skills for me, they're one habit.
 
 The AI-native part is real for me but not framework-heavy yet. At Quextro, an ed-tech platform I
@@ -23,8 +21,7 @@ claiming production agent-framework experience I don't have.
 
 On the "Senior" title, I'm at three years commercial. What I can point to instead of years is
 ownership: Quextro was mine end to end, architecture through deploy, CI/CD, Docker and
-OpenTelemetry included, and the iGaming work now includes owning a GEO access-rules feature from
-schema to admin UI by myself.
+OpenTelemetry included, and on the iGaming platform I owned a GEO access-rules feature from schema to admin UI by myself.
 
 The 11am-3pm ET overlap works fine from Vienna, that's an evening block for me, nothing unusual.
 

@@ -44,8 +44,13 @@ For each apply / apply-low, create `applications/<slug>-djinni/` with:
 Message rules (from `playbook/proposals.md`, they transfer one to one):
 - First two lines carry the job-specific hook. No greeting padding, no "I saw your posting".
 - Lead with the one proof that maps to their need: Quextro for solo ownership and AI features;
-  the current iGaming microservices for Node/Express/Postgres/Redis/event-driven work; Oasi Kadir
-  numbers for Astro, performance and funnels; Azulejo for TanStack Start, Cloudflare, catalogs.
+  the recent iGaming microservices work for Node/Express/Postgres/Redis/event-driven work; Oasi
+  Kadir numbers for Astro, performance and funnels; Azulejo for TanStack Start, Cloudflare, catalogs.
+- Never say or imply that Dan has a job right now. No "day job", "current work", "my current
+  role", "alongside", "in parallel", "capacity for another role", hours per week, or a company
+  named as a present employer. Write about the iGaming platform as recent contract work in the
+  past tense ("on a live iGaming platform I shipped …"), and name the company only if the post
+  asks for references. Dan reads as available now (rule 7 in `playbook/proposals.md`).
 - Name honest gaps in one plain paragraph. It has been the most-praised part of past messages.
 - Dan's voice: plain, warm, short sentences, hyphens not em-dashes, no "X not Y" flourishes, no
   labeled-list sentences. Read it back as speech.

@@ -1,6 +1,8 @@
 # Work Experience
 
-Source of truth for proposals. Pull the most relevant role for each job.
+Source of truth for proposals. Pull the most relevant role for each job. In messages, never
+present Renewator as a current job: write about it as recent contract work in the past tense and
+name the company only if asked for references (see `workflow/DJINNI-WORKFLOW.md`).
 
 ## Renewator — Software Engineer, contract (Aug 2026 – present)
 - Event-driven **Node.js microservices for a live iGaming platform** (identity, gateway, wallet,
