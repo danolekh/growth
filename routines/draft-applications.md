@@ -36,10 +36,11 @@ Fetch the queue:
 ```
 curl -s -H "Authorization: Bearer {{ROUTINE_TOKEN}}" {{WORKER_URL}}/api/queue
 ```
-It returns `{ "runId": "...", "items": [...] }`. Each item has `kind` (`application` or `reply`),
-`job` (id, source, title, company, url, description, detail, score, language, flags) and for
-replies a `message` (subject, body, contact). If `items` is empty, POST a run heartbeat (step 6)
-and stop.
+It returns `{ "runId": "...", "items": [...] }`. Each item has `kind` (`application`, `reply` or
+`questions`), `job` (id, source, title, company, url, description, detail, score, language, flags;
+`detail.questions` holds the recruiter's screening questions when the form has them), for replies
+a `message` (subject, body, contact), and for questions items a `draftId`, `repoPath` and
+`draft.questions`. If `items` is empty, POST a run heartbeat (step 6) and stop.
 
 For each `application` item:
 3. If `job.company` has a website you can infer (from the post or a quick `curl -sL` of the
@@ -62,20 +63,32 @@ For each `application` item:
    one plain paragraph; hyphens not em-dashes; no "X, not Y" flourishes; no labeled-list
    sentences; only claim what `me/skills.md` and `me/experience.md` support. Location is Vienna,
    EU time zone; mention it for EU/Western employers, omit it for Ukrainian companies.
-   Discord posts (source `effect`, or any job whose url is a discord.com link): `message` is a
-   direct message to the poster, under 900 characters, first line names their product, ends
-   with one concrete question; put a 2–3 sentence public thread reply into `formNotes` for the
-   case where their DMs are closed. `salaryAsk` is a short value only, e.g. `$2,000`,
-   `€48-55k/yr`, or `leave blank`; never a sentence.
+   Discord posts (source `effect` or `discord`, or any job whose url is a discord.com link):
+   `message` is a direct message to the poster, under 900 characters, first line names their
+   product, ends with one concrete question; put a 2–3 sentence public thread reply into
+   `threadReply` (not `formNotes`) for the case where their DMs are closed. `salaryAsk` is a
+   short value only, e.g. `$2,000`, `€48-55k/yr`, or `leave blank`; never a sentence.
+   The JSON `message`, `formNotes`, `threadReply` and every `answer` must contain no hard line
+   wraps: one line per paragraph, one blank line between paragraphs; unwrap the text from
+   message.md before posting. If `job.detail.questions` is present, answer every question in
+   Dan's voice, each answer under 120 words, in the same order, and include them as
+   `answers: [{"question": "...", "answer": "..."}]` in the POST (also write them into
+   message.md under `## Screening answers`).
 5. POST the draft:
 ```
 curl -s -X POST -H "Authorization: Bearer {{ROUTINE_TOKEN}}" -H "content-type: application/json" \
   {{WORKER_URL}}/api/drafts -d @- <<'JSON'
-{ "jobId": "<job.id>", "kind": "application", "language": "en|uk", "message": "<the message text only, plain>",
-  "salaryAsk": "<what to enter>", "resumeVariant": "fullstack|frontend|backend|astro-perf",
-  "formNotes": "<form settings and timing in one paragraph>", "repoPath": "applications/<slug>/", "runId": "<runId>" }
+{ "jobId": "<job.id>", "kind": "application", "language": "en|uk", "message": "<the message text only, plain, no hard wraps>",
+  "salaryAsk": "<short value>", "resumeVariant": "fullstack|frontend|backend|astro-perf",
+  "formNotes": "<form settings and timing in one paragraph>", "threadReply": "<Discord only>",
+  "answers": [{"question": "...", "answer": "..."}], "repoPath": "applications/<slug>/", "runId": "<runId>" }
 JSON
 ```
+
+For each `questions` item: read `<repoPath>/message.md` for the message you already wrote, answer
+each question in `draft.questions` in Dan's voice (under 120 words each, same order), append them
+to that message.md under `## Screening answers`, and POST
+`{"kind": "answers", "draftId": "<draftId>", "answers": [{"question": "...", "answer": "..."}], "runId": "<runId>"}`.
 
 For each `reply` item: write `applications/<slug>/reply-<n>.md` with a short, warm reply in the
 sender's language (answer their questions, propose two concrete time slots in CET if they ask

@@ -20,6 +20,8 @@ export interface SendOptions {
   readonly keyboard?: InlineButton[][];
   readonly disablePreview?: boolean;
   readonly silent?: boolean;
+  /** Ask Telegram to open a reply box on this message (used to collect pasted questions). */
+  readonly forceReply?: boolean;
 }
 
 export class Telegram extends Context.Service<
@@ -71,7 +73,11 @@ export class Telegram extends Context.Service<
       });
 
       const markup = (options?: SendOptions) =>
-        options?.keyboard ? { reply_markup: { inline_keyboard: options.keyboard } } : {};
+        options?.keyboard
+          ? { reply_markup: { inline_keyboard: options.keyboard } }
+          : options?.forceReply
+            ? { reply_markup: { force_reply: true, selective: true } }
+            : {};
 
       return {
         configured: true,

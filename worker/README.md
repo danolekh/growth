@@ -52,7 +52,29 @@ src/Db.ts             repository over Drizzle; schema in src/db/schema.ts; SQL i
   in .env) decide apply vs apply-low vs skip out of 20. Lower SCORE_LOW_MIN for more cards.
 - `POST $WORKER_URL/api/admin/tick` with the admin token runs a tick on demand;
   `/api/admin/ingest?keyword=React` pulls one feed; `/api/admin/stats` prints counts.
-- Bot commands: `/ping`, `/summary`, `/queue`, `/fire`, `/stage <applicationId> <stage>`.
+- Bot commands: `/ping`, `/summary`, `/queue`, `/fire`, `/stage <applicationId> <stage>`,
+  `/questions <draftId> <questions…>`.
+
+## Apply flow (one message per job, edited in place)
+1. A card arrives: title, pay, flags, score, the buttons **Apply / Later / Skip** (or **Draft it**
+   when the routine has not written the text yet).
+2. **Apply** turns the same message into the package: the text in a copyable block, screening
+   answers when there are any, form settings, and the buttons **✅ Applied**, **📎 Resume PDF**,
+   **🔗 Open the post** (**💬 Open in Discord** for Discord posts, with the thread-reply fallback
+   under the DM text), **⏭ Skip**, **❓ Questions**. Nothing is recorded yet.
+3. Send it on the platform, then tap **✅ Applied**: the ledger row is written and the card collapses
+   to one line with **↩️ Undo** (voids the row and brings the package back).
+4. **Later** parks a card; the morning summary re-sends it. **Skip** closes it.
+
+Screening questions: with `DJINNI_SESSION` set (Dan's `sessionid` cookie for djinni.co), the enrich
+step reads the logged-in job page and the recruiter's questions go to the routine with the job, so
+the answers are in the package from the start. Without it, or for other sites, tap **❓ Questions**
+and paste them as a reply; the routine answers them on its next run and the package updates. When
+the cookie expires the daily summary says so.
+
+Discord reading: `POST /api/admin/ingest-discord` (admin token) takes
+`{ posts: [{ id, channel, author, authorId?, content, url, createdAt }] }` from the Mac-side bot
+described in `../hermes/discord-forwarder.md`; posts become hot `discord` jobs and get DM cards.
 
 ## Budget notes (free plan)
 10 ms CPU and 50 subrequests per invocation, one cron trigger, 10k Workers AI neurons/day. The

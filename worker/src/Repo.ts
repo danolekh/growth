@@ -3,7 +3,7 @@
  * client Alchemy hands us for D1. Chunked writes respect D1's 100-bound-parameter limit;
  * conditional updates use `meta.changes` as the mutex, since KV has no compare-and-swap.
  */
-import { and, count, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull, lt, ne, sql } from "drizzle-orm";
 import type { EffectSQLiteD1Database } from "drizzle-orm/effect-d1";
 import { Context, Effect, Layer } from "effect";
 
@@ -138,6 +138,15 @@ const makeRepo = (db: Db) => {
       .where(and(eq(drafts.kind, "reply"), eq(drafts.status, "requested")))
       .limit(limit);
 
+  /** Drafts with pasted or fetched questions that the routine has not answered yet. */
+  const queueQuestions = (limit: number) =>
+    db
+      .select({ draft: drafts, job: jobs })
+      .from(drafts)
+      .innerJoin(jobs, eq(jobs.id, drafts.jobId))
+      .where(and(isNotNull(drafts.questions), isNull(drafts.answers), inArray(drafts.status, ["carded", "approved", "later"])))
+      .limit(limit);
+
   const insertApplication = (row: typeof applications.$inferInsert) =>
     db.insert(applications).values(row).pipe(Effect.asVoid);
 
@@ -248,7 +257,8 @@ const makeRepo = (db: Db) => {
       carded: countWhere(drafts, eq(drafts.status, "carded")),
       later: countWhere(drafts, eq(drafts.status, "later")),
       unscored: countWhere(scores, and(eq(scores.verdict, "unscored"), sql`${scores.attempts} >= 3`)),
-      sentWeek: countWhere(applications, sql`${applications.sentAt} >= ${weekIso}`),
+      sentWeek: countWhere(applications, and(sql`${applications.sentAt} >= ${weekIso}`, ne(applications.stage, "not_sent"))),
+      approved: countWhere(drafts, eq(drafts.status, "approved")),
       replies: countWhere(applications, inArray(applications.stage, ["replied", "call", "test", "offer"])),
       inbound: countWhere(messages, and(eq(messages.direction, "in"), sql`${messages.receivedAt} >= ${sinceIso}`)),
       repliesRequested: countWhere(drafts, and(eq(drafts.kind, "reply"), eq(drafts.status, "requested"))),
@@ -280,6 +290,7 @@ const makeRepo = (db: Db) => {
     draftsByStatus,
     updateDraft,
     queueReplies,
+    queueQuestions,
     insertApplication,
     applicationById,
     updateApplication,

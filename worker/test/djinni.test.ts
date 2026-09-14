@@ -72,3 +72,23 @@ describe("Djinni job page", () => {
     expect(isHot(5, { years_required: 2, applications: 20, work_format: "Full Remote" }, [])).toBe(true);
   });
 });
+
+describe("Djinni screening questions", () => {
+  const { parseQuestions } = require("../src/Djinni.ts") as typeof import("../src/Djinni.ts");
+  test("public (logged-out) page yields null", () => {
+    expect(parseQuestions(fx("djinni-job-848007.html"))).toBeNull();
+  });
+  test("a logged-in form with two questions yields both", () => {
+    const html = `<html><title>Job – Djinni</title><form id="apply_form"><h3>Questions from the recruiter</h3>
+      <label for="q1">What are the typical cases you run into where AI breaks something?</label><textarea id="q1"></textarea>
+      <label for="q2">Beyond writing code, what does your daily routine look like?</label><textarea id="q2"></textarea>
+      <h3>Message &amp; contact details</h3><label for="message">Message</label><textarea id="message"></textarea></form></html>`;
+    expect(parseQuestions(html)).toEqual([
+      "What are the typical cases you run into where AI breaks something?",
+      "Beyond writing code, what does your daily routine look like?",
+    ]);
+  });
+  test("a logged-in page without the block yields an empty list", () => {
+    expect(parseQuestions(`<html><title>Job – Djinni</title><form id="apply_form"><label for="message">Message</label></form></html>`)).toEqual([]);
+  });
+});

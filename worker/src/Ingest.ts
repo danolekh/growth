@@ -2,7 +2,7 @@
  * Turning raw sources into `jobs` rows and moving them through new → enriched → scored →
  * carded. Each function does a bounded amount of work so a tick stays inside the CPU budget.
  */
-import { Effect } from "effect";
+import { Effect, Option, Redacted } from "effect";
 
 import { draftKeyboard, jobCard, noDraftKeyboard } from "./Cards.ts";
 import {
@@ -13,6 +13,7 @@ import {
   fetchRss,
   isHot,
   parseDetail,
+  parseQuestions,
   parseRss,
   rssVerdict,
   type JobDetail,
@@ -21,6 +22,7 @@ import type { ExtractedJob } from "./Email.ts";
 import { EFFECT_JOBS_URL, fetchEffectJobs } from "./EffectJobs.ts";
 import { fetchLatestThread, fetchPage } from "./HackerNews.ts";
 import { Kv } from "./Kv.ts";
+import { Settings } from "./Settings.ts";
 import { HttpClient } from "effect/unstable/http";
 import { now, Repo, type DraftRow, type JobRow, type NewJob, type ScoreRow } from "./Repo.ts";
 import { detectLanguage, Scorer, type ScoreInput } from "./Scorer.ts";
@@ -178,6 +180,47 @@ export const ingestEffectJobs = Effect.fn("Ingest.effectJobs")(function* () {
   return { cards: jobs.length, inserted: rows.length };
 });
 
+export interface DiscordPost {
+  readonly id: string;
+  readonly channel: string;
+  readonly author: string;
+  readonly authorId?: string | null;
+  readonly content: string;
+  readonly url: string;
+  readonly createdAt: string;
+}
+
+/** Posts forwarded from a Discord job channel by the Mac-side bot. Every one is on-lane by construction. */
+export const ingestDiscordPosts = Effect.fn("Ingest.discordPosts")(function* (posts: ReadonlyArray<DiscordPost>) {
+  const repo = yield* Repo;
+  const seen = yield* repo.existingJobIds(posts.map((p) => `discord:${p.id}`));
+  const rows: NewJob[] = [];
+  for (const p of posts) {
+    const id = `discord:${p.id}`;
+    if (seen.has(id)) continue;
+    const firstLine = p.content.split("\n").map((l) => l.trim()).find(Boolean) ?? "";
+    rows.push({
+      id,
+      source: "discord",
+      externalId: p.id,
+      url: p.url,
+      title: `${p.author} · ${firstLine.slice(0, 80)}`,
+      company: p.author,
+      description: p.content.slice(0, 6000),
+      postedAt: p.createdAt,
+      firstSeenAt: now(),
+      updatedAt: now(),
+      keywords: JSON.stringify([`discord:${p.channel}`]),
+      flags: JSON.stringify(["discord", "niche-stack"]),
+      status: "enriched",
+      hot: 1,
+      detail: JSON.stringify({ detail_error: "discord-post", work_format: "Remote", discord: { channel: p.channel, author: p.author, authorId: p.authorId ?? null } }),
+    });
+  }
+  if (rows.length) yield* repo.insertJobs(rows);
+  return { received: posts.length, inserted: rows.length };
+});
+
 /** Jobs that arrived by email already carry all we will ever know; they skip the page fetch. */
 export const ingestExtracted = Effect.fn("Ingest.extracted")(function* (extracted: ReadonlyArray<ExtractedJob>) {
   const repo = yield* Repo;
@@ -209,17 +252,36 @@ export const ingestExtracted = Effect.fn("Ingest.extracted")(function* (extracte
   return rows.length;
 });
 
-/** Fetch the public Djinni page for up to `limit` new jobs, politely spaced. */
+/**
+ * Fetch the Djinni page for up to `limit` new jobs, politely spaced. With Dan's session cookie the
+ * page also carries the application form, so the recruiter's screening questions land in `detail`.
+ */
 export const enrichDjinni = Effect.fn("Ingest.enrichDjinni")(function* (limit: number) {
   const client = yield* HttpClient.HttpClient;
   const repo = yield* Repo;
+  const kv = yield* Kv;
+  const settings = yield* Settings;
+  const session = Option.map(settings.djinniSession, Redacted.value).pipe(Option.getOrUndefined);
   const batch = yield* repo.jobsByStatus("new", limit, "djinni");
   let done = 0;
   for (const job of batch) {
-    const detail = yield* fetchJobPage(client, job.url).pipe(
-      Effect.map(parseDetail),
-      Effect.catch((err) => Effect.succeed<JobDetail>({ detail_error: String(err) })),
+    const detail: JobDetail & { cookieExpired?: boolean } = yield* fetchJobPage(client, job.url, session).pipe(
+      Effect.map((html): JobDetail & { cookieExpired?: boolean } => {
+        const d = parseDetail(html);
+        if (!session) return d;
+        const questions = parseQuestions(html);
+        return questions === null ? { ...d, cookieExpired: true } : { ...d, questions, cookieExpired: false };
+      }),
+      Effect.catch((err) => Effect.succeed<JobDetail & { cookieExpired?: boolean }>({ detail_error: String(err) })),
     );
+    if (session && !detail.detail_error) {
+      if (detail.cookieExpired) {
+        if (!(yield* kv.get("djinni:cookie-expired"))) yield* Effect.logWarning("djinni session cookie looks expired");
+        yield* kv.put("djinni:cookie-expired", now(), 30 * 86400);
+      } else yield* kv.delete("djinni:cookie-expired");
+    }
+    delete (detail as { cookieExpired?: boolean }).cookieExpired;
+    if (detail.questions && detail.questions.length === 0) delete detail.questions;
     const dv = detailVerdict(detail);
     const allFlags = [...jobFlags(job), ...dv.flags];
     const ageHours = job.postedAt ? (Date.now() - new Date(job.postedAt).getTime()) / 36e5 : Number.NaN;

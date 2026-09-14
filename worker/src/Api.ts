@@ -7,15 +7,16 @@ import { Effect, Option, Redacted, Schema } from "effect";
 import { HttpServerResponse } from "effect/unstable/http";
 
 import { Background } from "./Bindings.ts";
-import { applyPackage, draftKeyboard, formSettingsText, sentKeyboard } from "./Cards.ts";
+import { appliedLine, applyPackage, draftKeyboard, formSettingsText, packageKeyboard, undoKeyboard, type Answer } from "./Cards.ts";
 import { BadRequest } from "./Errors.ts";
-import { cardFor, cardPendingDrafts, ingestDjinniKeyword, jobDetail } from "./Ingest.ts";
+import { cardFor, cardPendingDrafts, ingestDiscordPosts, ingestDjinniKeyword, jobDetail } from "./Ingest.ts";
 import { Kv } from "./Kv.ts";
 import { newId, now, Repo } from "./Repo.ts";
 import { Routine } from "./Routine.ts";
 import { Settings } from "./Settings.ts";
 import { dailySummary } from "./Summary.ts";
 import { escapeHtml, Telegram } from "./Telegram.ts";
+import { isDiscordUrl, splitQuestions, unwrap } from "./Text.ts";
 import { runTick } from "./Tick.ts";
 
 // ---------- schemas for what comes in ----------
@@ -34,6 +35,22 @@ export const DraftBody = Schema.Struct({
   formNotes: OptionalString,
   repoPath: OptionalString,
   runId: OptionalString,
+  threadReply: OptionalString,
+  answers: Schema.optionalKey(Schema.Array(Schema.Struct({ question: Schema.String, answer: Schema.String }))),
+});
+
+export const DiscordPostsBody = Schema.Struct({
+  posts: Schema.Array(
+    Schema.Struct({
+      id: Schema.String,
+      channel: Schema.String,
+      author: Schema.String,
+      authorId: OptionalString,
+      content: Schema.String,
+      url: Schema.String,
+      createdAt: Schema.String,
+    }),
+  ),
 });
 
 export const RunBody = Schema.Struct({ runId: OptionalString, drafts: Schema.optionalKey(Schema.Number), replies: Schema.optionalKey(Schema.Number), skipped: Schema.optionalKey(Schema.Number), notes: OptionalString });
@@ -61,11 +78,33 @@ export const TelegramUpdate = Schema.Struct({
   ),
   message: Schema.optionalKey(
     Schema.Struct({
+      message_id: Schema.optionalKey(Schema.Number),
       text: Schema.optionalKey(Schema.String),
       chat: Schema.optionalKey(Schema.Struct({ id: Schema.Union([Schema.String, Schema.Number]) })),
+      reply_to_message: Schema.optionalKey(Schema.Struct({ message_id: Schema.Number })),
     }),
   ),
 });
+
+const parseAnswers = (s: string | null): Answer[] => {
+  if (!s) return [];
+  try {
+    const v = JSON.parse(s);
+    return Array.isArray(v) ? v.filter((a) => a && typeof a.question === "string" && typeof a.answer === "string") : [];
+  } catch {
+    return [];
+  }
+};
+
+const parseQuestionsJson = (s: string | null): string[] => {
+  if (!s) return [];
+  try {
+    const v = JSON.parse(s);
+    return Array.isArray(v) ? v.filter((q) => typeof q === "string") : [];
+  } catch {
+    return [];
+  }
+};
 
 // ---------- helpers ----------
 
@@ -102,17 +141,56 @@ const draftWithJob = Effect.fn("Api.draftWithJob")(function* (draftId: string) {
   return { draft, job, card: cardFor(job, score, draft) };
 });
 
-/** Apply: hand Dan everything he needs to send, and record the send in the ledger. */
-const onApply = Effect.fn("Api.onApply")(function* (draftId: string) {
+/**
+ * Render the package into the draft's own card: header, copyable text, screening answers,
+ * form settings, and the buttons. Falls back to separate messages only when it is too long.
+ */
+const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string) {
   const repo = yield* Repo;
   const telegram = yield* Telegram;
-  const kv = yield* Kv;
+  const found = yield* draftWithJob(draftId);
+  if (!found) return false;
+  const { draft, job, card } = found;
+  const discord = job.source === "discord" || isDiscordUrl(job.url);
+  const answers = parseAnswers(draft.answers);
+  const questions = draft.questions ? parseQuestionsJson(draft.questions) : (jobDetail(job).questions ?? []);
+  const keyboard = packageKeyboard(draft.id, job.url, { discord, hasAnswers: answers.length > 0, hasQuestions: questions.length > 0 });
+  const header = card.split("\n").slice(0, 3).join("\n");
+  const pkg = applyPackage(header, draft.message, formSettingsText(draft), answers, draft.threadReply, discord);
+  if (pkg.length <= 4000 && draft.tgMessageId) {
+    const edited = yield* telegram.edit(draft.tgMessageId, pkg, { keyboard }).pipe(Effect.as(true), Effect.catch(() => Effect.succeed(false)));
+    if (edited) return true;
+  }
+  const mid = yield* telegram.send(pkg.length <= 4000 ? pkg : `✅ <b>Applying</b>\n${header}`, { keyboard }).pipe(Effect.catch(() => Effect.succeed(-1)));
+  if (mid > 0) yield* repo.updateDraft(draft.id, { tgMessageId: mid });
+  if (pkg.length > 4000) {
+    yield* telegram.send(`<pre>${escapeHtml(draft.message)}</pre>`, { disablePreview: true });
+    for (const a of answers) yield* telegram.send(`<b>${escapeHtml(a.question)}</b>\n<pre>${escapeHtml(a.answer)}</pre>`);
+    if (discord && draft.threadReply) yield* telegram.send(`<b>If DMs are closed, reply in the thread:</b>\n<pre>${escapeHtml(draft.threadReply)}</pre>`);
+    yield* telegram.send(formSettingsText(draft));
+  }
+  return mid > 0;
+});
+
+/** Apply: open the package. Nothing is recorded as sent until Dan taps Applied. */
+const onApply = Effect.fn("Api.onApply")(function* (draftId: string) {
+  const repo = yield* Repo;
   const found = yield* draftWithJob(draftId);
   if (!found) return "Draft not found";
-  const { draft, job, card } = found;
-  // `approved` is accepted too: a draft stuck there means an earlier tap never sent the package.
-  if (!(yield* repo.updateDraft(draft.id, { status: "approved" }, ["carded", "approved", "later"]))) return "Already handled";
+  if (!(yield* repo.updateDraft(found.draft.id, { status: "approved" }, ["carded", "approved", "later"]))) return "Already handled";
+  yield* repo.insertEvent({ jobId: found.job.id, draftId: found.draft.id, kind: "apply", at: now() });
+  yield* showPackage(found.draft.id);
+  return "Paste, send, then tap Applied";
+});
 
+/** Applied: the send happened on the platform; record it and collapse the card. */
+const onApplied = Effect.fn("Api.onApplied")(function* (draftId: string) {
+  const repo = yield* Repo;
+  const telegram = yield* Telegram;
+  const found = yield* draftWithJob(draftId);
+  if (!found) return "Draft not found";
+  const { draft, job } = found;
+  if (!(yield* repo.updateDraft(draft.id, { status: "sent" }, "approved"))) return "Already handled";
   const appId = newId();
   yield* repo.insertApplication({
     id: appId,
@@ -126,26 +204,41 @@ const onApply = Effect.fn("Api.onApply")(function* (draftId: string) {
     stage: "sent",
     stageAt: now(),
   });
-  yield* repo.updateDraft(draft.id, { status: "sent" });
   yield* repo.updateJob(job.id, { status: "applied" });
-  yield* repo.insertEvent({ jobId: job.id, draftId: draft.id, kind: "apply", at: now() });
+  yield* repo.insertEvent({ jobId: job.id, draftId: draft.id, kind: "sent", at: now() });
+  if (draft.tgMessageId) yield* telegram.edit(draft.tgMessageId, appliedLine(job.title, job.company), { keyboard: undoKeyboard(appId) }).pipe(Effect.ignore);
+  return "Recorded";
+});
 
-  // One message, edited in place: header, copyable text, form settings, and buttons for the
-  // PDF and the post. Falls back to separate messages only when the package is too long.
-  const keyboard = sentKeyboard(appId, draft.id, job.url);
-  const header = card.split("\n").slice(0, 3).join("\n");
-  const pkg = applyPackage(header, draft.message, formSettingsText(draft));
-  const fits = pkg.length <= 4000;
-  const edited = draft.tgMessageId && fits
-    ? yield* telegram.edit(draft.tgMessageId, pkg, { keyboard }).pipe(Effect.as(true), Effect.catch(() => Effect.succeed(false)))
-    : false;
-  if (!edited) {
-    if (draft.tgMessageId) yield* telegram.edit(draft.tgMessageId, `✅ <b>Applying</b>\n${header}`, { keyboard }).pipe(Effect.ignore);
-    yield* telegram.send(`<pre>${escapeHtml(draft.message)}</pre>`, { disablePreview: true });
-    yield* telegram.send(formSettingsText(draft));
-  }
-  yield* kv.put(`sent:${draft.id}`, "1", 7 * 86400);
-  return fits ? "Card updated with the text" : "Sent the text as separate messages";
+/** Questions: ask Dan to paste the recruiter's questions as a reply to the prompt. */
+const onQuestions = Effect.fn("Api.onQuestions")(function* (draftId: string) {
+  const telegram = yield* Telegram;
+  const kv = yield* Kv;
+  const found = yield* draftWithJob(draftId);
+  if (!found) return "Draft not found";
+  const pending = found.draft.questions && !found.draft.answers;
+  if (pending) return "Questions are queued; answers arrive with the next routine run";
+  const mid = yield* telegram.send(
+    `❓ Reply to this message with the recruiter's questions for <b>${escapeHtml(found.job.title)}</b>, one per line.`,
+    { forceReply: true },
+  );
+  if (mid > 0) yield* kv.put(`q:prompt:${mid}`, draftId, 7 * 86400);
+  return "Waiting for your reply";
+});
+
+/** Pasted questions arrive as a Telegram reply to the prompt (or as /questions <draftId> …). */
+const onQuestionsReply = Effect.fn("Api.onQuestionsReply")(function* (draftId: string, text: string) {
+  const repo = yield* Repo;
+  const routine = yield* Routine;
+  const telegram = yield* Telegram;
+  const questions = splitQuestions(text);
+  if (!questions.length) return "No questions found in that reply";
+  const moved = yield* repo.updateDraft(draftId, { questions: JSON.stringify(questions), answers: null }, ["carded", "approved", "later"]);
+  if (!moved) return "That draft is closed";
+  yield* repo.insertEvent({ draftId, kind: "questions", payload: JSON.stringify(questions), at: now() });
+  const fired = yield* routine.fire(`questions for ${draftId}`);
+  yield* telegram.send(`Got ${questions.length} question${questions.length > 1 ? "s" : ""}. ${fired ? "The routine is answering now." : "Answers come with the next routine run."}`, { silent: true });
+  return "Queued";
 });
 
 /** The resume PDF for a draft's variant, on demand. */
@@ -166,7 +259,7 @@ const onSkip = Effect.fn("Api.onSkip")(function* (draftId: string) {
   const telegram = yield* Telegram;
   const found = yield* draftWithJob(draftId);
   if (!found) return "Draft not found";
-  const moved = yield* repo.updateDraft(draftId, { status: "skipped" });
+  const moved = yield* repo.updateDraft(draftId, { status: "skipped" }, ["carded", "approved", "later", "pending"]);
   yield* repo.updateJob(found.job.id, { status: "skipped", filterReason: "dan-skip" });
   yield* repo.insertEvent({ jobId: found.job.id, draftId, kind: "skip", at: now() });
   if (found.draft.tgMessageId) yield* telegram.edit(found.draft.tgMessageId, `⏭ <s>${escapeHtml(found.job.title)}</s> · skipped`);
@@ -178,7 +271,7 @@ const onLater = Effect.fn("Api.onLater")(function* (draftId: string) {
   const telegram = yield* Telegram;
   const found = yield* draftWithJob(draftId);
   if (!found) return "Draft not found";
-  yield* repo.updateDraft(draftId, { status: "later" });
+  if (!(yield* repo.updateDraft(draftId, { status: "later" }, ["carded", "approved"]))) return "Already handled";
   yield* repo.insertEvent({ jobId: found.job.id, draftId, kind: "later", at: now() });
   if (found.draft.tgMessageId) yield* telegram.edit(found.draft.tgMessageId, `🕓 ${escapeHtml(found.job.title)} · parked until the morning summary`);
   return "Parked";
@@ -211,14 +304,17 @@ const onJobSkip = Effect.fn("Api.onJobSkip")(function* (jobId: string) {
   return "Skipped";
 });
 
+/** Undo an Applied tap: the ledger row is voided, the package comes back. */
 const onNotSent = Effect.fn("Api.onNotSent")(function* (appId: string) {
   const repo = yield* Repo;
   const app = yield* repo.applicationById(appId);
   if (!app) return "Not found";
   yield* repo.updateApplication(appId, { stage: "not_sent", stageAt: now() });
-  if (app.draftId) yield* repo.updateDraft(app.draftId, { status: "carded" });
-  if (app.jobId) yield* repo.updateJob(app.jobId, { status: "scored" });
+  if (app.draftId) yield* repo.updateDraft(app.draftId, { status: "approved" }, "sent");
+  // Back to `drafted`, never `scored`: `scored` would put the job back in the routine's queue.
+  if (app.jobId) yield* repo.updateJob(app.jobId, { status: "drafted" });
   yield* repo.insertEvent({ jobId: app.jobId, draftId: app.draftId, kind: "not_sent", at: now() });
+  if (app.draftId) yield* showPackage(app.draftId);
   return "Reverted";
 });
 
@@ -251,6 +347,11 @@ const onCommand = Effect.fn("Api.onCommand")(function* (chatId: string, textIn: 
     }
     case "/fire":
       return (yield* routine.fire("manual /fire")) ? "Fired." : "Not fired (budget, gap, or not configured).";
+    case "/questions": {
+      const [draftId, ...q] = rest;
+      if (!draftId || !q.length) return "Usage: /questions <draftId> <questions, one per line>";
+      return yield* onQuestionsReply(draftId, q.join(" "));
+    }
     case "/stage": {
       const [appId, stage] = rest;
       if (!appId || !stage) return "Usage: /stage <applicationId> <viewed|replied|call|test|offer|hired|rejected>";
@@ -279,6 +380,10 @@ const callbackAction = (kind: string, id: string): Effect.Effect<string, unknown
       return onNotSent(id);
     case "p":
       return onResume(id);
+    case "ok":
+      return onApplied(id);
+    case "q":
+      return onQuestions(id);
     case "r":
       return onReplyRequest(id);
     default:
@@ -306,6 +411,15 @@ const handleUpdate = Effect.fn("Api.handleUpdate")(function* (update: typeof Tel
   if (msg?.text) {
     const chatId = String(msg.chat?.id ?? "");
     if (telegram.configured && chatId !== telegram.chatId && !msg.text.startsWith("/start")) return;
+    if (msg.reply_to_message) {
+      const kv = yield* Kv;
+      const draftId = yield* kv.get(`q:prompt:${msg.reply_to_message.message_id}`);
+      if (draftId) {
+        yield* kv.delete(`q:prompt:${msg.reply_to_message.message_id}`);
+        yield* onQuestionsReply(draftId, msg.text).pipe(Effect.catch((err) => Effect.succeed(`Failed: ${String(err)}`)));
+        return;
+      }
+    }
     const command: Effect.Effect<string | null, unknown, any> = onCommand(chatId, msg.text);
     const reply = yield* command.pipe(Effect.catch((err) => Effect.succeed(`Failed: ${escapeHtml(String(err))}`)));
     if (!reply) return;
@@ -321,6 +435,7 @@ const queuePayload = Effect.fn("Api.queuePayload")(function* () {
   const runId = yield* repo.startRun("routine");
   const waiting = yield* repo.queueJobs(8);
   const replies = yield* repo.queueReplies(3);
+  const questions = yield* repo.queueQuestions(3);
   for (const w of waiting) yield* repo.updateJob(w.job.id, { status: "drafting" }, "scored");
   return {
     runId,
@@ -340,6 +455,13 @@ const queuePayload = Effect.fn("Api.queuePayload")(function* () {
           hot: w.job.hot === 1,
           score: { total: w.score.total, verdict: w.score.verdict, summary: w.score.summary, language: w.score.language },
         },
+      })),
+      ...questions.map((q) => ({
+        kind: "questions",
+        draftId: q.draft.id,
+        repoPath: q.draft.repoPath,
+        job: { id: q.job.id, source: q.job.source, title: q.job.title, company: q.job.company, url: q.job.url, description: q.job.description.slice(0, 3000) },
+        draft: { message: q.draft.message, questions: parseQuestionsJson(q.draft.questions) },
       })),
       ...replies.map((r) => ({
         kind: "reply",
@@ -362,13 +484,25 @@ const acceptDraft = Effect.fn("Api.acceptDraft")(function* (body: typeof DraftBo
   const telegram = yield* Telegram;
   const kind = body.kind ?? "application";
   const jobId = body.jobId ?? null;
+  const message = unwrap(body.message ?? "");
+  const formNotes = body.formNotes ? unwrap(body.formNotes) : null;
+  const threadReply = body.threadReply ? unwrap(body.threadReply) : null;
+  const answers: Answer[] = (body.answers ?? []).map((a) => ({ question: unwrap(a.question), answer: unwrap(a.answer) }));
+
+  if (kind === "answers" && body.draftId) {
+    const draft = yield* repo.draftById(body.draftId);
+    if (!draft) return { ok: false, error: "unknown draft" };
+    yield* repo.updateDraft(draft.id, { answers: JSON.stringify(answers), runId: body.runId ?? draft.runId });
+    if (draft.status === "approved" && draft.tgMessageId) yield* showPackage(draft.id);
+    else if (draft.tgMessageId) yield* telegram.send(`❓ Answers ready for <b>${escapeHtml(draft.jobId ?? "")}</b>; they show on Apply.`, { silent: true });
+    return { ok: true };
+  }
 
   if (kind === "skip" && jobId) {
-    yield* repo.updateJob(jobId, { status: "skipped", filterReason: `routine: ${body.formNotes ?? ""}`.slice(0, 200) });
+    yield* repo.updateJob(jobId, { status: "skipped", filterReason: `routine: ${formNotes ?? ""}`.slice(0, 200) });
     return { ok: true };
   }
   if (kind === "reply") {
-    const message = body.message ?? "";
     if (body.draftId)
       yield* repo.updateDraft(body.draftId, {
         message,
@@ -386,15 +520,19 @@ const acceptDraft = Effect.fn("Api.acceptDraft")(function* (body: typeof DraftBo
   if (!job) return { ok: false, error: "unknown job" };
 
   const draftId = newId();
+  const questions = jobDetail(job).questions ?? [];
   yield* repo.insertDraft({
     id: draftId,
     jobId,
     kind,
-    message: body.message ?? "",
+    message,
     language: body.language ?? null,
     salaryAsk: body.salaryAsk ?? null,
     resumeVariant: body.resumeVariant ?? "fullstack",
-    formNotes: body.formNotes ?? null,
+    formNotes,
+    threadReply,
+    questions: questions.length ? JSON.stringify(questions) : null,
+    answers: answers.length ? JSON.stringify(answers) : null,
     repoPath: body.repoPath ?? null,
     runId: body.runId ?? null,
     status: "pending",
@@ -489,6 +627,10 @@ export const handleRequest = Effect.fn("Api.handleRequest")(
         const body = yield* decodeBody(ResumeFileBody)(req);
         yield* kv.put(`tg:file:${body.variant}`, body.fileId);
         return json({ ok: true });
+      }
+      if (path === "/api/admin/ingest-discord" && method === "POST") {
+        const body = yield* decodeBody(DiscordPostsBody)(req);
+        return json(yield* ingestDiscordPosts(body.posts));
       }
       if (path === "/api/admin/summary" && method === "POST") {
         yield* dailySummary();

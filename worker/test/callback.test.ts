@@ -13,3 +13,12 @@ describe("callback data", () => {
     expect(parseCallback("a:5ae49b89-53ba-457b-bc66-811e4a4420f7")).toEqual({ kind: "a", id: "5ae49b89-53ba-457b-bc66-811e4a4420f7" });
   });
 });
+
+describe("new callbacks", () => {
+  test("applied and questions parse like the others and stay under Telegram's 64-byte limit", () => {
+    const id = "5ae49b89-53ba-457b-bc66-811e4a4420f7";
+    expect(parseCallback(`ok:${id}`)).toEqual({ kind: "ok", id });
+    expect(parseCallback(`q:${id}`)).toEqual({ kind: "q", id });
+    expect(new TextEncoder().encode(`ok:${id}`).length).toBeLessThanOrEqual(64);
+  });
+});

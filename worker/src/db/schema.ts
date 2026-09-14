@@ -74,10 +74,16 @@ export const drafts = sqliteTable(
     runId: text("run_id"),
     /** Telegram message id of the card, so taps can edit it. */
     tgMessageId: integer("tg_message_id"),
-    /** pending | carded | approved | sent | skipped | later */
+    /** pending → carded → approved → sent | skipped; carded → later → carded (morning summary) */
     status: text("status").notNull().default("pending"),
     /** For replies: the inbound message this answers. */
     messageId: text("message_id"),
+    /** JSON string[]: recruiter screening questions (fetched with the session cookie, or pasted). */
+    questions: text("questions"),
+    /** JSON [{question, answer}] written by the routine. */
+    answers: text("answers"),
+    /** Discord only: the public thread reply to use when the poster's DMs are closed. */
+    threadReply: text("thread_reply"),
     createdAt: text("created_at").notNull(),
   },
   (t) => [index("drafts_status_idx").on(t.status), index("drafts_job_idx").on(t.jobId)],

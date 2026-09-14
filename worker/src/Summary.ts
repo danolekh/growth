@@ -6,6 +6,7 @@ import { Effect } from "effect";
 
 import { draftKeyboard } from "./Cards.ts";
 import { cardFor } from "./Ingest.ts";
+import { Kv } from "./Kv.ts";
 import { now, Repo } from "./Repo.ts";
 import { escapeHtml, Telegram } from "./Telegram.ts";
 import { localTime } from "./Time.ts";
@@ -23,10 +24,13 @@ export const dailySummary = Effect.fn("Summary.daily")(function* () {
     `New in 24h: ${escapeHtml(bySource)} · scored ${s.scoredSince}`,
     `Awaiting a draft: ${s.awaitingDraft} · cards open: ${s.carded} · parked (later): ${s.later}`,
     `Sent this week: ${s.sentWeek} · conversations alive: ${s.replies}`,
+    s.approved ? `Packages open, not yet marked Applied: ${s.approved}` : null,
     s.inbound ? `Inbound mail in 24h: ${s.inbound}` : null,
     s.repliesRequested ? `Replies waiting for the routine: ${s.repliesRequested}` : null,
     s.unscored ? `Could not score: ${s.unscored} (model errors, see /queue)` : null,
   ].filter(Boolean);
+  const kv = yield* Kv;
+  if (yield* kv.get("djinni:cookie-expired")) lines.push("⚠️ Djinni session cookie expired: refresh DJINNI_SESSION in worker/.env and redeploy.");
   yield* telegram.send(lines.join("\n"));
 
   // Parked drafts come back once a day, as fresh cards.

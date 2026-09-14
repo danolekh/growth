@@ -37,6 +37,8 @@ export interface RssItem {
 
 export interface JobDetail {
   company?: string;
+  /** Recruiter screening questions from the logged-in application form. */
+  questions?: string[];
   salary?: string;
   years_required?: number | null;
   work_format?: string;
@@ -231,9 +233,9 @@ export const parseDetail = (html: string): JobDetail => {
 
 // ---------- fetchers ----------
 
-const getText = (client: HttpClient.HttpClient, url: string, accept: string) =>
+const getText = (client: HttpClient.HttpClient, url: string, accept: string, extra: Record<string, string> = {}) =>
   HttpClientRequest.get(url).pipe(
-    HttpClientRequest.setHeaders({ "user-agent": UA, accept }),
+    HttpClientRequest.setHeaders({ "user-agent": UA, accept, ...extra }),
     client.execute,
     Effect.flatMap(HttpClientResponse.filterStatusOk),
     Effect.flatMap((res) => res.text),
@@ -245,5 +247,31 @@ const getText = (client: HttpClient.HttpClient, url: string, accept: string) =>
 export const fetchRss = (client: HttpClient.HttpClient, keyword: string) =>
   getText(client, rssUrl(keyword), "application/rss+xml, application/xml, text/xml");
 
-export const fetchJobPage = (client: HttpClient.HttpClient, url: string) =>
-  getText(client, url, "text/html");
+/** With a session cookie the page carries the application form, including the recruiter's questions. */
+export const fetchJobPage = (client: HttpClient.HttpClient, url: string, sessionId?: string) =>
+  getText(client, url, "text/html", sessionId ? { cookie: `sessionid=${sessionId}` } : {});
+
+/**
+ * Screening questions from the application form. `null` means the page was served logged out
+ * (so a configured cookie has expired); `[]` means the form has no questions.
+ */
+export const parseQuestions = (html: string): string[] | null => {
+  const loggedOut =
+    /name="anon_apply"/.test(html) ||
+    /"candidate_id"\s*:\s*""/.test(html) ||
+    /<title>[^<]*(?:Log ?in|Вхід|Увійти)[^<]*<\/title>/i.test(html);
+  if (loggedOut) return null;
+  const start = html.search(/Questions from the recruiter|Питання від рекрутера|Запитання від рекрутера/i);
+  if (start < 0) return [];
+  const end = html.slice(start).search(/Message\s*(&amp;|&)\s*contact details|Повідомлення та контакт|<\/form>/i);
+  const block = html.slice(start, end > 0 ? start + end : start + 20000);
+  const labels = [...block.matchAll(/<label[^>]*>([\s\S]*?)<\/label>/gi)]
+    .map((m) => toText(m[1]!).replace(/\s+/g, " ").trim())
+    .filter((t) => t.length > 3 && !/^(message|повідомлення|email|your name|ім'я)$/i.test(t));
+  if (labels.length) return labels;
+  // Fallback: question-looking lines in the block's text.
+  return toText(block)
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 10 && l.endsWith("?") && !/Questions from the recruiter/i.test(l));
+};

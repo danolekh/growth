@@ -31,7 +31,7 @@ export interface CardDraft {
   readonly language: string | null;
 }
 
-const sourceIcon: Record<string, string> = { djinni: "🟢", upwork: "🟩", linkedin: "🔵", hn: "🟠", effect: "🟣" };
+const sourceIcon: Record<string, string> = { djinni: "🟢", upwork: "🟩", linkedin: "🔵", hn: "🟠", effect: "🟣", discord: "💬" };
 
 export const jobCard = (job: CardJob, score: CardScore | null, draft: CardDraft | null): string => {
   const d = job.detail ?? {};
@@ -71,21 +71,63 @@ export const noDraftKeyboard = (jobId: string): InlineButton[][] => [
   ],
 ];
 
-export const sentKeyboard = (applicationId: string, draftId: string, url: string): InlineButton[][] => [
-  [
-    { text: "📎 Resume PDF", callback_data: `p:${draftId}` },
-    { text: "🔗 Open the post", url },
-  ],
-  [{ text: "↩️ Didn't send", callback_data: `n:${applicationId}` }],
-];
+export interface PackageOptions {
+  readonly discord: boolean;
+  readonly hasAnswers: boolean;
+  readonly hasQuestions: boolean;
+}
+
+/** Buttons under the package: confirm the send, get the PDF, open the post, skip, ask for answers. */
+export const packageKeyboard = (draftId: string, url: string, o: PackageOptions): InlineButton[][] => {
+  const rows: InlineButton[][] = [
+    [
+      { text: "✅ Applied", callback_data: `ok:${draftId}` },
+      { text: "📎 Resume PDF", callback_data: `p:${draftId}` },
+    ],
+    [
+      { text: o.discord ? "💬 Open in Discord" : "🔗 Open the post", url },
+      { text: "⏭ Skip", callback_data: `s:${draftId}` },
+    ],
+  ];
+  if (!o.discord && !o.hasAnswers) rows.push([{ text: o.hasQuestions ? "❓ Answers pending" : "❓ Questions", callback_data: `q:${draftId}` }]);
+  return rows;
+};
+
+export const undoKeyboard = (applicationId: string): InlineButton[][] => [[{ text: "↩️ Undo", callback_data: `n:${applicationId}` }]];
+
+/** The collapsed form of a card after Applied. */
+export const appliedLine = (title: string, company: string | null): string =>
+  `✅ <b>Applied</b> · ${escapeHtml(title)}${company ? ` · ${escapeHtml(company)}` : ""}`;
+
+export interface Answer {
+  readonly question: string;
+  readonly answer: string;
+}
 
 /**
  * The whole apply package in one message: the card header, the text to paste inside a
- * copyable block, and the form settings. Telegram caps a message at 4096 characters; the
- * caller falls back to separate messages when the package is longer.
+ * copyable block, screening answers, form settings, and for Discord the thread fallback.
+ * Telegram caps a message at 4096 characters; the caller falls back to separate messages.
  */
-export const applyPackage = (header: string, message: string, form: string): string =>
-  [`✅ <b>Applying</b>`, header, "", "<b>Paste this</b> (tap the block to copy):", `<pre>${escapeHtml(message)}</pre>`, "", form].join("\n");
+export const applyPackage = (
+  header: string,
+  message: string,
+  form: string,
+  answers: ReadonlyArray<Answer>,
+  threadReply: string | null,
+  discord: boolean,
+): string =>
+  [
+    `✅ <b>Applying</b>`,
+    header,
+    "",
+    discord ? "<b>Direct message</b> (tap the block to copy; open the post, tap the author, Message):" : "<b>Paste this</b> (tap the block to copy):",
+    `<pre>${escapeHtml(message)}</pre>`,
+    ...answers.flatMap((a) => ["", `<b>${escapeHtml(a.question)}</b>`, `<pre>${escapeHtml(a.answer)}</pre>`]),
+    ...(discord && threadReply ? ["", "<b>If DMs are closed, reply in the thread:</b>", `<pre>${escapeHtml(threadReply)}</pre>`] : []),
+    "",
+    form,
+  ].join("\n");
 
 export const replyKeyboard = (messageId: string): InlineButton[][] => [
   [{ text: "✍️ Draft a reply", callback_data: `r:${messageId}` }],
