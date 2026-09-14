@@ -29,7 +29,8 @@ const chunk = <T>(xs: readonly T[], size: number): T[][] => {
   return out;
 };
 
-const changes = (res: unknown): number => Number((res as any)?.meta?.changes ?? (res as any)?.changes ?? 0);
+// The Effect D1 driver returns rows, not a change count, so every conditional write uses
+// RETURNING and counts the rows that came back.
 
 const makeRepo = (db: Db) => {
   const insertJobs = (rows: NewJob[]) =>
@@ -62,7 +63,8 @@ const makeRepo = (db: Db) => {
       .update(jobs)
       .set({ ...patch, updatedAt: now() })
       .where(expectStatus ? and(eq(jobs.id, id), eq(jobs.status, expectStatus)) : eq(jobs.id, id))
-      .pipe(Effect.map((res) => changes(res) > 0));
+      .returning({ id: jobs.id })
+      .pipe(Effect.map((rows) => rows.length > 0));
 
   const upsertScore = (row: typeof scores.$inferInsert) =>
     db
@@ -114,12 +116,17 @@ const makeRepo = (db: Db) => {
       .orderBy(desc(drafts.createdAt))
       .limit(limit);
 
-  const updateDraft = (id: string, patch: Partial<NewDraft>, expectStatus?: string) =>
+  const updateDraft = (id: string, patch: Partial<NewDraft>, expectStatus?: string | ReadonlyArray<string>) =>
     db
       .update(drafts)
       .set(patch)
-      .where(expectStatus ? and(eq(drafts.id, id), eq(drafts.status, expectStatus)) : eq(drafts.id, id))
-      .pipe(Effect.map((res) => changes(res) > 0));
+      .where(
+        expectStatus === undefined
+          ? eq(drafts.id, id)
+          : and(eq(drafts.id, id), typeof expectStatus === "string" ? eq(drafts.status, expectStatus) : inArray(drafts.status, [...expectStatus])),
+      )
+      .returning({ id: drafts.id })
+      .pipe(Effect.map((rows) => rows.length > 0));
 
   /** Reply drafts Dan asked for, joined with the inbound message. */
   const queueReplies = (limit: number) =>
@@ -191,7 +198,8 @@ const makeRepo = (db: Db) => {
       .insert(messages)
       .values(row)
       .onConflictDoNothing()
-      .pipe(Effect.map((res) => (changes(res) > 0 ? row.id : null)));
+      .returning({ id: messages.id })
+      .pipe(Effect.map((rows) => (rows.length > 0 ? row.id : null)));
 
   const messageById = (id: string) =>
     db
@@ -208,14 +216,16 @@ const makeRepo = (db: Db) => {
       .update(jobs)
       .set({ status: "expired", updatedAt: now() })
       .where(and(inArray(jobs.status, ["new", "enriched", "scored"]), lt(jobs.firstSeenAt, beforeIso)))
-      .pipe(Effect.map(changes));
+      .returning({ id: jobs.id })
+      .pipe(Effect.map((rows) => rows.length));
 
   const markSilent = (beforeIso: string) =>
     db
       .update(applications)
       .set({ stage: "silent", stageAt: now() })
       .where(and(eq(applications.stage, "sent"), lt(applications.sentAt, beforeIso)))
-      .pipe(Effect.map(changes));
+      .returning({ id: applications.id })
+      .pipe(Effect.map((rows) => rows.length));
 
   // ---------- stats ----------
 

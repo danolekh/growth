@@ -110,7 +110,8 @@ const onApply = Effect.fn("Api.onApply")(function* (draftId: string) {
   const found = yield* draftWithJob(draftId);
   if (!found) return "Draft not found";
   const { draft, job, card } = found;
-  if (!(yield* repo.updateDraft(draft.id, { status: "approved" }, "carded"))) return "Already handled";
+  // `approved` is accepted too: a draft stuck there means an earlier tap never sent the package.
+  if (!(yield* repo.updateDraft(draft.id, { status: "approved" }, ["carded", "approved", "later"]))) return "Already handled";
 
   const appId = newId();
   yield* repo.insertApplication({
