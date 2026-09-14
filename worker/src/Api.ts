@@ -152,11 +152,14 @@ const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string) {
   if (!found) return false;
   const { draft, job, card } = found;
   const discord = job.source === "discord" || isDiscordUrl(job.url);
-  const answers = parseAnswers(draft.answers);
+  // Drafts stored before the normalizer still carry the routine's hard wraps; unwrap is idempotent.
+  const message = unwrap(draft.message);
+  const threadReply = draft.threadReply ? unwrap(draft.threadReply) : null;
+  const answers = parseAnswers(draft.answers).map((a) => ({ question: unwrap(a.question), answer: unwrap(a.answer) }));
   const questions = draft.questions ? parseQuestionsJson(draft.questions) : (jobDetail(job).questions ?? []);
   const keyboard = packageKeyboard(draft.id, job.url, { discord, hasAnswers: answers.length > 0, hasQuestions: questions.length > 0 });
   const header = card.split("\n").slice(0, 3).join("\n");
-  const pkg = applyPackage(header, draft.message, formSettingsText(draft), answers, draft.threadReply, discord);
+  const pkg = applyPackage(header, message, formSettingsText(draft), answers, threadReply, discord);
   if (pkg.length <= 4000 && draft.tgMessageId) {
     const edited = yield* telegram.edit(draft.tgMessageId, pkg, { keyboard }).pipe(Effect.as(true), Effect.catch(() => Effect.succeed(false)));
     if (edited) return true;
@@ -164,9 +167,9 @@ const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string) {
   const mid = yield* telegram.send(pkg.length <= 4000 ? pkg : `✅ <b>Applying</b>\n${header}`, { keyboard }).pipe(Effect.catch(() => Effect.succeed(-1)));
   if (mid > 0) yield* repo.updateDraft(draft.id, { tgMessageId: mid });
   if (pkg.length > 4000) {
-    yield* telegram.send(`<pre>${escapeHtml(draft.message)}</pre>`, { disablePreview: true });
+    yield* telegram.send(`<pre>${escapeHtml(message)}</pre>`, { disablePreview: true });
     for (const a of answers) yield* telegram.send(`<b>${escapeHtml(a.question)}</b>\n<pre>${escapeHtml(a.answer)}</pre>`);
-    if (discord && draft.threadReply) yield* telegram.send(`<b>If DMs are closed, reply in the thread:</b>\n<pre>${escapeHtml(draft.threadReply)}</pre>`);
+    if (discord && threadReply) yield* telegram.send(`<b>If DMs are closed, reply in the thread:</b>\n<pre>${escapeHtml(threadReply)}</pre>`);
     yield* telegram.send(formSettingsText(draft));
   }
   return mid > 0;
