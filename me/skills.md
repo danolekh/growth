@@ -27,6 +27,11 @@ Use this to match a job's requirements to concrete, honest claims. Only claim wh
 - **PostgreSQL**, SQLite
 - **Redis** (ioredis in production: counters, rate limits, daily flags, alert dedupe)
 - **Drizzle ORM** (no heavy CMS wrappers — comfortable hand-rolling data layers; variants/SKUs/attributes modeling)
+- **Supabase** — extensive, across many client projects (confirmed by Dan 2026-09-15): Postgres with
+  row-level security policies, Supabase Auth (email + OAuth providers), Storage for uploads, Edge
+  Functions, Realtime subscriptions; schema via the Supabase CLI and migrations, generated
+  TypeScript types. Knows when plain Postgres + Drizzle is the better call. Add project names here
+  when Dan supplies them; until then messages say "a good number of client projects", no names.
 - Object storage (Cloudflare R2 / S3-compatible) + image pipelines (sharp, blurhash)
 
 ## CMS

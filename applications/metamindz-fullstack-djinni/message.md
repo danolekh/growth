@@ -11,10 +11,7 @@ I'm a full-stack TypeScript developer with three years commercial experience. My
 2,000+ products and built Quextro, an ed-tech platform, solo from an empty repo to real users.
 
 On your stack specifically: Next.js, TypeScript and Tailwind are daily work, and my last freelance project was an Astro/Tailwind rebuild that took mobile PageSpeed from 69 to 99 with a 5.0
-review (danolekh.com/p/oasi-kadir). Zustand is in my regular toolkit. I haven't used Supabase by
-name, but I work with Postgres and Drizzle directly, hand-rolling schemas and migrations,
-so the relational and auth patterns underneath are familiar ground, Supabase would be a short ramp
-rather than a new concept. I use Claude Code daily on real feature work and review everything it
+review (danolekh.com/p/oasi-kadir). Zustand is in my regular toolkit. Supabase has been my go-to backend on a good number of client projects: Postgres with row-level security, Supabase Auth, Storage, Edge Functions and Realtime, with the schema managed through the CLI and migrations and the TypeScript types generated from it. When a project outgrows it I'm just as comfortable on plain Postgres with Drizzle. I use Claude Code daily on real feature work and review everything it
 writes.
 
 On my freelance contracts I owned the client communication directly, so working independently across two projects and talking straight to clients is how I already operate.
@@ -33,13 +30,7 @@ Portfolio: danolekh.com · GitHub: github.com/danolekh
 **Please describe your commercial experience with Supabase. What have you used it for in your
 projects?**
 
-I haven't used Supabase specifically in a commercial project. My relational database work has
-gone through Postgres directly, mostly with Drizzle ORM: hand-rolled schemas, migrations, and
-query work in production, most recently on a live iGaming platform (wallets, bonuses, GEO rules)
-and on my own e-commerce build, Azulejo. Supabase sits on top of Postgres and adds auth and
-realtime on top, so the core data modeling and migration work transfers directly. I'd expect the
-ramp to be short, learning Supabase's auth and client conventions rather than the relational
-thinking underneath.
+Supabase has been my default backend on a good number of client projects. I've used Postgres with row-level security policies for multi-tenant data, Supabase Auth with email and OAuth providers, Storage for user uploads, Edge Functions for the logic that shouldn't run in the browser, and Realtime where a dashboard had to update live. I manage schemas through the Supabase CLI and migrations and generate the TypeScript types from them. I also know where Supabase stops being enough: on my last contract I ran plain Postgres with Drizzle for money-correctness work, so I pick the tool for the job rather than default to one.
 
 **Please describe your experience with Zustand. What kind of state have you managed with it?**
 
