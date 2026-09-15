@@ -382,7 +382,7 @@ const onCommand = Effect.fn("Api.onCommand")(function* (chatId: string, textIn: 
       yield* dailySummary();
       return null;
     case "/queue": {
-      const waiting = yield* repo.queueJobs(8);
+      const waiting = yield* repo.queueJobs(8, (yield* Settings).web3Live);
       if (!waiting.length) return "Nothing waiting for a draft.";
       return waiting.map((w) => `${w.job.hot ? "🔥 " : ""}${escapeHtml(w.job.title)} · ${escapeHtml(w.job.company ?? "?")} · ${w.score.total}/20`).join("\n");
     }
@@ -473,8 +473,9 @@ const handleUpdate = Effect.fn("Api.handleUpdate")(function* (update: typeof Tel
 
 const queuePayload = Effect.fn("Api.queuePayload")(function* () {
   const repo = yield* Repo;
+  const settings = yield* Settings;
   const runId = yield* repo.startRun("routine");
-  const waiting = yield* repo.queueJobs(8);
+  const waiting = yield* repo.queueJobs(8, settings.web3Live);
   const replies = yield* repo.queueReplies(3);
   const questions = yield* repo.queueQuestions(3);
   for (const w of waiting) yield* repo.updateJob(w.job.id, { status: "drafting" }, "scored");

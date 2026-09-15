@@ -57,7 +57,11 @@ second line or a reply; no hashtags; five real replies in wevm/Base/Foundry thre
 > Mainnet next week. [Basescan link] [repo]
 
 ## Where things stand (update as they land)
-- milestone-escrow: contract + tests in `~/code/milestone-escrow` (this week), Sepolia (week 1),
-  mainnet + demo (week 2)
-- Worker web3 lane: feeds live (this week); web3.career waits for the token
-- Site: pages drafted behind the `WEB3_LIVE` flag in `~/code/danolekh`; flips with the mainnet deploy
+- milestone-escrow: contract + tests done 2026-09-15 in `~/code/milestone-escrow` (77 tests, 100%
+  coverage, CI + slither configured); GitHub repo not created yet (needs `gh` or the web UI); Sepolia
+  deploy needs the Etherscan key + deployer wallet; mainnet + demo in week 2
+- Worker web3 lane: live 2026-09-15 (cryptojobslist, hireweb3, remote3, hashtagweb3 scheduled at
+  10:00-11:05 Vienna; 28 jobs kept on day one); web3.career waits for the token; web3 cards show but
+  stay out of the writer's queue until `WEB3_LIVE=true` in `worker/.env` + redeploy
+- Site: hydraulics case study committed (not deployed); writing index + web3 pages behind the
+  `WEB3_LIVE` flag / `draft: true` in `~/code/danolekh`; flips with the mainnet deploy

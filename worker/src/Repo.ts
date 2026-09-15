@@ -3,7 +3,7 @@
  * client Alchemy hands us for D1. Chunked writes respect D1's 100-bound-parameter limit;
  * conditional updates use `meta.changes` as the mutex, since KV has no compare-and-swap.
  */
-import { and, count, desc, eq, inArray, isNotNull, isNull, lt, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull, lt, ne, notLike, sql } from "drizzle-orm";
 import type { EffectSQLiteD1Database } from "drizzle-orm/effect-d1";
 import { Context, Effect, Layer } from "effect";
 
@@ -89,12 +89,19 @@ const makeRepo = (db: Db) => {
       .pipe(Effect.asVoid);
 
   /** Jobs the routine should draft: scored apply/apply-low with no draft yet, hot first. */
-  const queueJobs = (limit: number) =>
+  /** `includeWeb3: false` keeps web3-flagged jobs out of the writer's queue until the lane is live. */
+  const queueJobs = (limit: number, includeWeb3 = true) =>
     db
       .select({ job: jobs, score: scores })
       .from(jobs)
       .innerJoin(scores, eq(scores.jobId, jobs.id))
-      .where(and(eq(jobs.status, "scored"), inArray(scores.verdict, ["apply", "apply-low"])))
+      .where(
+        and(
+          eq(jobs.status, "scored"),
+          inArray(scores.verdict, ["apply", "apply-low"]),
+          includeWeb3 ? undefined : notLike(jobs.flags, '%"web3"%'),
+        ),
+      )
       .orderBy(desc(jobs.hot), desc(jobs.firstSeenAt))
       .limit(limit);
 

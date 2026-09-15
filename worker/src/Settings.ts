@@ -36,6 +36,8 @@ export class Settings extends Context.Service<
     /** Total (out of 20) at or above which a job is an apply / apply-low; tune from the summary data. */
     readonly scoreApplyMin: number;
     readonly scoreLowMin: number;
+    /** Web3 jobs are carded from day one but only enter the drafting queue once the brand is live. */
+    readonly web3Live: boolean;
     /** web3.career API token (free, attribution required); the source is skipped without it. */
     readonly webThreeCareerToken: Option.Option<Redacted.Redacted<string>>;
   }
@@ -68,6 +70,7 @@ export class Settings extends Context.Service<
           .filter((n) => Number.isInteger(n) && n >= 0 && n < 24),
         scoreApplyMin: yield* Config.number("SCORE_APPLY_MIN").pipe(Config.withDefault(15)),
         scoreLowMin: yield* Config.number("SCORE_LOW_MIN").pipe(Config.withDefault(12)),
+        web3Live: yield* Config.boolean("WEB3_LIVE").pipe(Config.withDefault(false)),
         // An empty WEB3_CAREER_TOKEN= line in .env counts as unset.
         webThreeCareerToken: Option.filter(yield* Config.option(Config.redacted("WEB3_CAREER_TOKEN")), (t) => Redacted.value(t).trim().length > 0),
       };

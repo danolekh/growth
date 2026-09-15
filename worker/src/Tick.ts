@@ -80,7 +80,7 @@ export const runTick = Effect.fn("Tick.run")(function* (scheduledTime: number, o
   stats.draftCards = yield* cardPendingDrafts(CARDS_PER_TICK).pipe(swallow("draft-cards", 0));
 
   // 5. Ask the routine to draft when something hot is waiting or a reply was requested.
-  const waiting = yield* repo.queueJobs(5).pipe(swallow("queue", []));
+  const waiting = yield* repo.queueJobs(5, settings.web3Live).pipe(swallow("queue", []));
   const replies = yield* repo.queueReplies(1).pipe(swallow("replies", []));
   const hot = waiting.some((w) => w.job.hot === 1);
   if (hot || replies.length > 0) stats.fired = (yield* routine.fire(hot ? "hot job waiting" : "reply requested")).fired;

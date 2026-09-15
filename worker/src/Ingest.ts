@@ -492,10 +492,12 @@ export const cardScored = Effect.fn("Ingest.cardScored")(function* (limit: numbe
   const rows = yield* repo.jobsWithoutCard(limit);
   const next = nextCronLocal(settings.routineCronHoursUtc);
   const footer = `⏳ The writer picks this up at ${next.label}${next.tomorrow ? " tomorrow" : ""}; tap Draft it to start it now.`;
+  const web3Footer = "🟡 web3 lane · drafting starts when the escrow is live (WEB3_LIVE)";
   let sent = 0;
   for (const { job, score } of rows) {
+    const isWeb3 = !settings.web3Live && jobFlags(job).includes("web3");
     const messageId = yield* telegram
-      .send(`${cardFor(job, score, null)}\n${footer}`, { keyboard: noDraftKeyboard(job.id), silent: job.hot !== 1 })
+      .send(`${cardFor(job, score, null)}\n${isWeb3 ? web3Footer : footer}`, { keyboard: noDraftKeyboard(job.id), silent: job.hot !== 1 || isWeb3 })
       .pipe(Effect.catch((err) => Effect.logWarning("card send failed", { err: String(err) }).pipe(Effect.as(-1))));
     if (messageId > 0) {
       yield* repo.updateJob(job.id, { tgMessageId: messageId });
