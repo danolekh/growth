@@ -22,6 +22,31 @@ AI-introduced bug if that's useful.
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh
 
+## Screening answers
+
+**Are you comfortable working on feature from a request to production? (don't need help a senior supervisory)**
+
+Yes. At Quextro I was the founding engineer and built the whole platform solo, backend and
+frontend, so taking a request all the way to something real users touch is just how I've worked
+for the last two years. On the iGaming platform I took the GEO access rules feature end to end
+myself - schema, the decision function, gateway counters, alerts, admin UI - without anyone
+walking me through it. I read the spec, ask questions up front if something's ambiguous, and then
+just build it.
+
+**How is it more comfortable for you to organize communication on a project with a client, directly or through the Project Manager?**
+
+I prefer talking directly with the client when the team is small, it's faster and fewer things get
+lost in translation. That said, I've also worked fine going through a PM on bigger teams, so if
+that's how this is structured I'm comfortable with it too. Whatever keeps decisions moving quickly
+works for me.
+
+**Are you comfortable working with AI coding tools, prompt engineering, and no-code development?**
+
+Very comfortable with AI coding tools and prompt engineering, I use Claude Code daily on real
+production work and know how to push it, catch when it's wrong, and steer it back. No-code isn't
+something I build with myself, I write the code by hand, but I understand what these tools produce
+well enough to read and evaluate their output.
+
 ## Form settings
 - **Salary expectations:** $1,500. No band shown ($$$ only), outsource company, treating as the
   default Ukrainian/outsource rate rather than reaching.
