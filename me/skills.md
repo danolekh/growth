@@ -46,6 +46,14 @@ Use this to match a job's requirements to concrete, honest claims. Only claim wh
 - OpenTelemetry (observability)
 - AWS
 
+## EVM / Web3 (hands-on since September 2026; see `web3.md` for what is live)
+- **Solidity 0.8** basics: custom errors, events, OpenZeppelin (SafeERC20, ReentrancyGuard), no upgradeability tricks
+- **Foundry**: forge tests, fuzz and invariant tests with handlers, fork tests, deploy scripts, Basescan (Etherscan v2) verification
+- **viem / wagmi v2** in wallet-connected frontends (injected, Coinbase Wallet, WalletConnect), TanStack Query for chain state
+- **Event indexing**: viem getLogs/getBlock, reorg handling with block-hash cursors, idempotent ingestion, reconciliation against balanceOf
+- **Base** (Sepolia + mainnet) deploys; USDC (6 decimals) handling
+- Not claimed: production contract experience beyond the public repos, audits, Solana/Rust, MEV, ERC-4337
+
 ## Domain / Other
 - **Reverse engineering existing frontends** — recreating functionality 1:1 from minified production
   bundles with no source available. Proven on the Oasi Kadir rebuild: the old oasikadir.it was

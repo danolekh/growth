@@ -17,12 +17,50 @@
       "dates": "Aug 2026 – present",
       "where": "Remote",
       "bullets": [
-        { "p": 1, "text": "Build event-driven Node.js microservices for a live iGaming platform (identity, gateway, wallet, bonus, casino, notification): Express, Drizzle ORM, PostgreSQL, Redis, Docker, GitLab CI." },
-        { "p": 2, "lanes": ["fullstack", "backend", "frontend"], "text": "Shipped per-brand GEO access rules end to end: schema, the shared decision function, gateway counters, monitoring alerts on threshold crossings, admin CRUD and the React admin UI." },
-        { "p": 3, "lanes": ["fullstack", "backend"], "text": "Money-correctness work: idempotent withdrawals keyed on the ledger index, single-statement bonus expiry with debit, abuse limits on bonus issuance, campaign dry-run calculation with per-user exclusion reasons." },
-        { "p": 4, "lanes": ["backend", "fullstack"], "text": "Auth hardening: strict rate limits on the login/register aliases, session-revocation events on password change and reset, consumed by the gateway." },
-        { "p": 2, "lanes": ["frontend", "astro"], "text": "Astro marketing site for a logistics operator: 14 routes in three locales (uk/en/pl), pixel-matched against Figma with measured diffs, static build served by nginx." },
-        { "p": 5, "lanes": ["fullstack"], "text": "Also an Astro marketing site for a logistics operator: 14 routes × 3 locales, pixel-matched against Figma." }
+        {
+          "p": 1,
+          "text": "Built event-driven Node.js microservices for a live iGaming platform (identity, gateway, wallet, bonus, casino, notification): Express, Drizzle ORM, PostgreSQL, Redis, Docker, GitLab CI."
+        },
+        {
+          "p": 2,
+          "lanes": [
+            "fullstack",
+            "backend",
+            "frontend"
+          ],
+          "text": "Shipped per-brand GEO access rules end to end: schema, the shared decision function, gateway counters, monitoring alerts on threshold crossings, admin CRUD and the React admin UI."
+        },
+        {
+          "p": 3,
+          "lanes": [
+            "fullstack",
+            "backend"
+          ],
+          "text": "Money-correctness work: idempotent withdrawals keyed on the ledger index, single-statement bonus expiry with debit, abuse limits on bonus issuance, campaign dry-run calculation with per-user exclusion reasons."
+        },
+        {
+          "p": 4,
+          "lanes": [
+            "backend",
+            "fullstack"
+          ],
+          "text": "Auth hardening: strict rate limits on the login/register aliases, session-revocation events on password change and reset, consumed by the gateway."
+        },
+        {
+          "p": 2,
+          "lanes": [
+            "frontend",
+            "astro"
+          ],
+          "text": "Astro marketing site for a logistics operator: 14 routes in three locales (uk/en/pl), pixel-matched against Figma with measured diffs, static build served by nginx."
+        },
+        {
+          "p": 5,
+          "lanes": [
+            "fullstack"
+          ],
+          "text": "Also an Astro marketing site for a logistics operator: 14 routes × 3 locales, pixel-matched against Figma."
+        }
       ]
     },
     {
@@ -32,9 +70,28 @@
       "dates": "Jan 2026 – Aug 2026",
       "where": "Remote",
       "bullets": [
-        { "p": 1, "text": "Rebuilt an agriturismo website on Astro, Tailwind and Strapi (IT/EN i18n, role-based CMS access, Vercel + Railway): mobile PageSpeed 69 → 99, load time ~16 s → under 2 s, 5.0 client review. Case study: danolekh.com/p/oasi-kadir" },
-        { "p": 2, "lanes": ["frontend", "astro", "fullstack"], "text": "Reverse-engineered the parallax carousel, card carousel and menu animation from the old site's minified WordPress bundle (no source available) and reimplemented them 1:1." },
-        { "p": 3, "lanes": ["astro", "fullstack", "backend"], "text": "Found and fixed hosting-compliance and DNS issues during the migration unprompted; full handover docs with everything under the client's own accounts." }
+        {
+          "p": 1,
+          "text": "Rebuilt an agriturismo website on Astro, Tailwind and Strapi (IT/EN i18n, role-based CMS access, Vercel + Railway): mobile PageSpeed 69 → 99, load time ~16 s → under 2 s, 5.0 client review. Case study: danolekh.com/p/oasi-kadir"
+        },
+        {
+          "p": 2,
+          "lanes": [
+            "frontend",
+            "astro",
+            "fullstack"
+          ],
+          "text": "Reverse-engineered the parallax carousel, card carousel and menu animation from the old site's minified WordPress bundle (no source available) and reimplemented them 1:1."
+        },
+        {
+          "p": 3,
+          "lanes": [
+            "astro",
+            "fullstack",
+            "backend"
+          ],
+          "text": "Found and fixed hosting-compliance and DNS issues during the migration unprompted; full handover docs with everything under the client's own accounts."
+        }
       ]
     },
     {
@@ -44,10 +101,29 @@
       "dates": "Dec 2024 – Dec 2025",
       "where": "Remote",
       "bullets": [
-        { "p": 1, "text": "Built the entire ed-tech platform solo: Bun + Effect.ts + Drizzle ORM on the back, React 19 + TanStack Router on the front. Used today by British teachers and students." },
-        { "p": 2, "text": "Designed the core LLM pipeline that extracts questions and topics from PDF exam papers, with Zod-validated output and retries when the model returns something wrong." },
-        { "p": 3, "lanes": ["fullstack", "backend"], "text": "Owned CI/CD, Docker containerization and OpenTelemetry observability on AWS and Railway." },
-        { "p": 3, "lanes": ["frontend"], "text": "Owned the React app end to end: TanStack Query cache design, optimistic updates, SSR and hydration, accessible UI." }
+        {
+          "p": 1,
+          "text": "Built the entire ed-tech platform solo: Bun + Effect.ts + Drizzle ORM on the back, React 19 + TanStack Router on the front. Used today by British teachers and students."
+        },
+        {
+          "p": 2,
+          "text": "Designed the core LLM pipeline that extracts questions and topics from PDF exam papers, with Zod-validated output and retries when the model returns something wrong."
+        },
+        {
+          "p": 3,
+          "lanes": [
+            "fullstack",
+            "backend"
+          ],
+          "text": "Owned CI/CD, Docker containerization and OpenTelemetry observability on AWS and Railway."
+        },
+        {
+          "p": 3,
+          "lanes": [
+            "frontend"
+          ],
+          "text": "Owned the React app end to end: TanStack Query cache design, optimistic updates, SSR and hydration, accessible UI."
+        }
       ]
     },
     {
@@ -57,8 +133,19 @@
       "dates": "May 2024 – Dec 2024",
       "where": "Remote",
       "bullets": [
-        { "p": 1, "text": "Delivered a full e-commerce platform from scratch on Next.js 14 + Drizzle ORM: custom admin panel for 2,000+ products, dynamic filtering, role-based auth." },
-        { "p": 2, "lanes": ["frontend", "astro", "fullstack"], "text": "90+ Real Experience Score and steady organic SEO traffic (meta, Open Graph, JSON-LD)." }
+        {
+          "p": 1,
+          "text": "Delivered a full e-commerce platform from scratch on Next.js 14 + Drizzle ORM: custom admin panel for 2,000+ products, dynamic filtering, role-based auth."
+        },
+        {
+          "p": 2,
+          "lanes": [
+            "frontend",
+            "astro",
+            "fullstack"
+          ],
+          "text": "90+ Real Experience Score and steady organic SEO traffic (meta, Open Graph, JSON-LD)."
+        }
       ]
     },
     {
@@ -68,17 +155,33 @@
       "dates": "2023 – 2024",
       "where": "Kyiv / remote",
       "bullets": [
-        { "p": 1, "text": "Optimized a multi-tenant system (React, Express, Firebase) serving 10,000+ active users." },
-        { "p": 2, "text": "Built internal Vue/NestJS tools and Chrome extensions used daily by the HR department." }
+        {
+          "p": 1,
+          "text": "Optimized a multi-tenant system (React, Express, Firebase) serving 10,000+ active users."
+        },
+        {
+          "p": 2,
+          "text": "Built internal Vue/NestJS tools and Chrome extensions used daily by the HR department."
+        }
       ]
     }
   ],
   "projects": [
-    { "name": "Azulejo", "link": "azulejo.danolekh.com", "text": "Ceramics storefront on TanStack Start + React 19, Drizzle + PostgreSQL, deployed on Cloudflare Workers (Hyperdrive), R2 media pipeline with sharp and blurhash, Strapi-backed journal, Vitest." }
+    {
+      "name": "Azulejo",
+      "link": "azulejo.danolekh.com",
+      "text": "Ceramics storefront on TanStack Start + React 19, Drizzle + PostgreSQL, deployed on Cloudflare Workers (Hyperdrive), R2 media pipeline with sharp and blurhash, Strapi-backed journal, Vitest."
+    }
   ],
   "openSource": [
-    { "name": "opentui", "text": "the terminal-UI library opencode is built on. Merged PR #558: browser-like text selection in textareas and a viewport-change selection bug fix." },
-    { "name": "code-racer", "text": "top contributor in 2023 (WebDevCody): multiplayer race rooms feature plus several fixes." }
+    {
+      "name": "opentui",
+      "text": "the terminal-UI library opencode is built on. Merged PR #558: browser-like text selection in textareas and a viewport-change selection bug fix."
+    },
+    {
+      "name": "code-racer",
+      "text": "top contributor in 2023 (WebDevCody): multiplayer race rooms feature plus several fixes."
+    }
   ],
   "skills": {
     "Languages": "TypeScript, JavaScript, Python, SQL",

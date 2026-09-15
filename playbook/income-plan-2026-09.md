@@ -27,6 +27,7 @@ Ranked by that metric:
 | **Djinni** (`djinni/`) | proven: 11 sends → 1 hire; cheap; fresh posts under ~100 apps convert | watcher every 2h; 3-5 tailored sends/day | Claude drafts, Dan sends |
 | **Upwork** (`automation/`, most-recent feed) | Rising Talent + 5.0 review; 2nd client → JSS; fixed-price is the best $/attention | 20 min/day scan; ≤ 2 sends/day; **no boost, no top-ups**; 213 connects ≈ 10 sends | Claude drafts, Dan sends |
 | **Niche communities** | Effect Discord #job-board, TanStack/Astro/Drizzle Discords, Oct 1 HN "Who is hiring" | weekly sweep, tailored messages | both |
+| **Web3 boards** (from 2026-09-15) | web3.career API, CryptoJobsList, HashtagWeb3, hireweb3, remote3 (Worker feeds), gm.careers + jobs.arbitrum.io (manual weekly), Base Discord #jobs | 🟡 cards, escrow link first | both |
 | **EU / Vienna boards** | opens after the Vertriebene card (2026-09-21): free labour-market access | LinkedIn, devjobs.at, WeAreDevelopers, karriere.at; 2-3 applications/week | both |
 | **Outbound hospitality** (`~/outbound`) | dormant (1 preview, 0 contacts) | parked until the target is hit | – |
 
@@ -39,6 +40,9 @@ Ranked by that metric:
 - **EU employment (Vienna):** ask **€48-55k/year gross** (Austria pays 14 salaries; that is roughly
   €3,400-3,900 per month × 14). Junior/mid full-stack in Vienna sits in that range.
 - **EU freelance/contract:** €35-45/hr, or €4,000-5,000/mo for a 4-day week.
+- **Web3 (added 2026-09-15):** full-time remote junior/junior+ EVM role **$3,000-4,000/mo** (60-70% of a
+  visible band, never the floor), **floor $2,500**; contract €35-45/hr; part-time stackable web3 roles
+  keep the $1,500 floor; Ukrainian web3 companies $2,000 with no band. Claims come from `me/web3.md`.
 
 ## Stacking rules
 - Read every contract for **exclusivity / non-compete / "full working time"** wording before

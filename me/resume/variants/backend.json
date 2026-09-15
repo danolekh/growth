@@ -2,7 +2,7 @@
   "name": "backend",
   "lane": "backend",
   "headline": "Backend / Node.js Engineer (TypeScript)",
-  "summary": "Backend-leaning TypeScript engineer, about three years commercial. Node and Bun services on PostgreSQL with Drizzle, Redis, event-driven flows between services, idempotency and rate limiting where money or auth is involved, Docker and CI around it. Currently shipping wallet, bonus and identity services for a live iGaming platform; previously built an ed-tech backend solo in Effect.ts with an LLM extraction pipeline.",
+  "summary": "Backend-leaning TypeScript engineer, about three years commercial. Node and Bun services on PostgreSQL with Drizzle, Redis, event-driven flows between services, idempotency and rate limiting where money or auth is involved, Docker and CI around it. Shipped wallet, bonus and identity services for a live iGaming platform; previously built an ed-tech backend solo in Effect.ts with an LLM extraction pipeline.",
   "maxBullets": 4,
   "order": ["renewator", "quextro", "radency", "freelance2024", "upwork2026"],
   "skillsOrder": ["Backend", "Data", "Languages", "Infra", "Frontend", "Other"]

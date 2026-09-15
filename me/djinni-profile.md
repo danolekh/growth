@@ -27,7 +27,7 @@ Full-stack TypeScript developer. I build production web apps end to end, React a
 front, Node or Bun with Postgres and Drizzle on the back, and I've shipped whole products solo,
 not just tickets.
 
-Right now I build event-driven Node microservices for an iGaming platform (identity, wallet,
+Most recently I built event-driven Node microservices for an iGaming platform (identity, wallet,
 bonus, gateway; Express, Drizzle, Postgres, Redis) and an Astro site pixel-matched to Figma.
 Before that I was founding engineer at Quextro, an ed-tech platform I built alone (Bun, Effect.ts,
 Drizzle, React 19), now used by British teachers and students. Earlier: a Next.js e-commerce

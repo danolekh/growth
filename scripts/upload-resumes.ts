@@ -13,7 +13,7 @@ import { loadEnv, need, workerUrl } from "./env.ts";
 loadEnv();
 const token = need("TELEGRAM_BOT_TOKEN");
 const chatId = need("TELEGRAM_CHAT_ID");
-const variants = ["fullstack", "frontend", "backend", "astro-perf"];
+const variants = ["fullstack", "frontend", "backend", "astro-perf", "web3"];
 
 for (const v of variants) {
   const path = join(import.meta.dir, "..", "me", "resume", "out", `Resume-${v}.pdf`);

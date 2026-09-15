@@ -38,6 +38,11 @@ Always have at least one **live, clickable** link ready. Live demos beat descrip
 > or anywhere client-facing, even if the URLs still resolve. Proof arsenal = Oasi Kadir (+ review),
 > Azulejo, Quextro, iFit, the OSS PRs, and the GitHub repos below.
 
+## Web3 (in progress, Sept–Oct 2026; cite only what `web3.md` marks as live)
+- **milestone-escrow** — USDC milestone escrow on Base: verified contract, fuzz + invariant tests, wagmi/viem demo. Repo/addresses/demo: see `web3.md`.
+- **evm-ledger-indexer** — reorg-safe double-entry ledger from on-chain events, Effect + viem + Cloudflare D1. See `web3.md`.
+- **effect-viem** — viem clients as Effect services (npm). See `web3.md`.
+
 ## Notable GitHub repos (https://github.com/danolekh — 36 public repos, OSS contributor)
 - **product-filtering-example** — TypeScript, 17★ — dynamic product filtering.
 - **drizzle-seeder** — TypeScript tool for seeding Drizzle databases.
@@ -75,6 +80,7 @@ else's codebase (great for "extend/maintain existing code" jobs). All merged, al
   bundle → 1:1 Astro rebuild) + the OSS PRs.
 - **Cloudflare Workers / edge deploy** → Azulejo (Workers + Hyperdrive).
 - **Data layer / Drizzle / Postgres** → Azulejo + drizzle-seeder repo.
+- **Web3 / EVM / dapp / Solidity / indexer** → the matching project from `web3.md` (escrow for dapp/frontend/Solidity posts, the indexer for backend/data posts, effect-viem for Effect or library posts) + the iGaming money-correctness story in the past tense.
 
 ## Deeper proof — Azulejo source
 The full Azulejo codebase is local at **`~/code/terra-and-sol`**. When a job needs a specific

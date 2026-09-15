@@ -16,7 +16,7 @@ products from an empty repo to real users: React, Next.js and TanStack on the fr
 with PostgreSQL and Drizzle on the back, CI/CD and observability around it.
 
 Built Quextro, an ed-tech platform, solo as founding engineer; British teachers and students use it
-today. Currently building event-driven Node microservices for an iGaming platform (identity,
+today. Most recently built event-driven Node microservices for an iGaming platform (identity,
 wallet, bonus, gateway) and an Astro marketing site pixel-matched to Figma. Freelance rescue of a
 hospitality site took mobile PageSpeed from 69 to 99 and load time from 16 seconds to under 2,
 with a 5.0 review.
