@@ -4,10 +4,8 @@ English. Apply via the link in the HN post (jawagg.notion.site job listing).
 
 ## Message (send this)
 
-TypeScript, Next.js, Node.js and Postgres is close to a one-for-one match with what I ship day
-to day. I built a full Next.js 14 App Router e-commerce platform from scratch, complete with a
-custom admin panel for 2,000+ products, dynamic filtering and role-based auth, and I run Node
-and Express microservices in production now for a live platform on Postgres with Drizzle ORM.
+TypeScript, Next.js, Node.js and Postgres is close to a one-for-one match with what I've been shipping. I built a full Next.js 14 App Router e-commerce platform from scratch, complete with a
+custom admin panel for 2,000+ products, dynamic filtering and role-based auth, and on my last contract I shipped Node and Express microservices to production for a live platform on Postgres with Drizzle ORM.
 
 A peer-to-peer marketplace has its own shape, two sides trading instead of one storefront, but
 the closest thing I've built is Azulejo, an e-commerce site with a faceted catalog: categories

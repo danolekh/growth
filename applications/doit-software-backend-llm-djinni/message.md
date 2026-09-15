@@ -12,9 +12,7 @@ runs in production for real users. It's LLM integration with prompt engineering,
 RAG/agent-framework pattern your post asks for, so I'd rather say that now than in the technical
 interview.
 
-Everything else on your list is close to how I already work. REST APIs, JSON, Git, Node.js and
-TypeScript are what I ship every day, most recently across six microservices for a live iGaming
-platform (Express, Drizzle, Postgres, Redis, Docker, GitLab CI). Database design and optimization
+Everything else on your list is close to how I already work. REST APIs, JSON, Git, Node.js and TypeScript are my daily tools, most recently across six microservices I shipped for a live iGaming platform (Express, Drizzle, Postgres, Redis, Docker, GitLab CI). Database design and optimization
 in Postgres with Drizzle is daily too, including money-correctness work like idempotent writes and
 single-statement updates where a race condition would cost someone real money. I've worked in AWS
 at Quextro, though not GCP or Azure specifically. I haven't used RabbitMQ or SQS, or n8n/make, so

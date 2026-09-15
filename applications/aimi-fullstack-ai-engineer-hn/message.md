@@ -8,8 +8,7 @@ Your line about spec-driven development is exactly how I already build - Claude 
 tool on real feature work, and I review everything it writes before it ships. That's a closer
 match than most stacks I apply to.
 
-I'm a full-stack TypeScript developer, three years commercial, currently shipping across six
-Node.js microservices for a live iGaming platform: Express, Drizzle, Postgres, Redis, Docker,
+I'm a full-stack TypeScript developer, three years commercial. My last contract was six Node.js microservices for a live iGaming platform: Express, Drizzle, Postgres, Redis, Docker,
 GitLab CI, event-driven flows with idempotency keys and rate limits between services. Before
 that I built Quextro, an ed-tech platform, solo from an empty repo to real users - British
 teachers and students use it today. The core of that product is an LLM pipeline I wrote that

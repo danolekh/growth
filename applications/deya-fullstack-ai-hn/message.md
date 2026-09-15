@@ -9,8 +9,7 @@ an ed-tech platform, solo from an empty repo to real users, British teachers and
 today. Next.js isn't new ground either, I shipped a full Next.js 14 App Router e-commerce
 platform with a custom admin panel for 2,000+ products before that.
 
-On the backend and cloud side: Bun and Effect.ts with Drizzle ORM at Quextro, Node/Express
-microservices in production now for a live platform (Postgres, Redis, Docker, GitLab CI), and
+On the backend and cloud side: Bun and Effect.ts with Drizzle ORM at Quextro, Node/Express microservices I shipped for a live iGaming platform (Postgres, Redis, Docker, GitLab CI), and
 deployments across AWS, Cloudflare Workers and Railway. For the agentic-workflows part, the
 closest thing I've shipped is Quextro's core LLM algorithm that extracts questions and topics
 from PDF exam papers, a single well-scoped pipeline rather than a multi-agent framework, so I
@@ -18,8 +17,7 @@ want to be honest that it's not the same as production agent orchestration.
 
 I have no healthcare-domain experience and no clinical-data background, and I won't pretend
 otherwise. What I do have is practice with data that has to stay correct and traceable over
-time: at the iGaming platform I work on now, money-correctness is the job, idempotent
-withdrawals keyed on a ledger index, auditable bonus expiry, abuse limits with logged reasons.
+time: on the iGaming platform I built for, money-correctness was the job: idempotent withdrawals keyed on a ledger index, auditable bonus expiry, abuse limits with logged reasons.
 Azulejo, my e-commerce build, also models a catalog of variants and attributes that has to stay
 consistent as records change. Different domain, same instinct for not letting the data lie.
 

@@ -5,10 +5,9 @@ English post, EU outstaff role.
 ## Message (send this)
 
 You mention you only need one or two people on the team who can cover React-based full-stack work
-while the rest stay backend/platform-focused. That's roughly where I sit: I run production
-Node.js microservices day to day and I'm comfortable owning a React admin UI on the same system.
+while the rest stay backend/platform-focused. That's roughly where I sit: production Node.js microservices are my home ground and I'm comfortable owning a React admin UI on the same system.
 
-Right now I ship six Node.js microservices for an iGaming platform: Express, Drizzle, PostgreSQL,
+On my last contract I shipped six Node.js microservices for an iGaming platform: Express, Drizzle, PostgreSQL,
 Redis, Docker, GitLab CI, plus the React admin UI for the same system. I've also done real
 reverse-engineering and modernization work: rebuilding a legacy WordPress site's animations from a
 minified bundle with no source, 1:1, as part of an Astro rebuild that took mobile PageSpeed from

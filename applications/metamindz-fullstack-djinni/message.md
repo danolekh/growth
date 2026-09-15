@@ -4,27 +4,20 @@ English post, UK agency, C1 English required. English message.
 
 ## Message (send this)
 
-Running two client projects at once with different codebases and priorities is exactly how my
-week looks right now, so switching context between a healthcare platform and an AI product doesn't
+Running two client projects at once with different codebases and priorities is how my last few months went, so switching context between a healthcare platform and an AI product doesn't
 scare me.
 
-I'm a full-stack TypeScript developer with three years commercial experience. Right now I ship
-production Node.js microservices for an iGaming platform (Express, Drizzle, PostgreSQL, Redis,
-Docker, GitLab CI) and a React admin UI, about ten hours a week, while also running freelance work
-on the side, so juggling separate client relationships and separate deploy pipelines is already my
-normal week. Before that I shipped a Next.js 14 e-commerce platform with a custom admin panel for
+I'm a full-stack TypeScript developer with three years commercial experience. My most recent contract was production Node.js microservices for an iGaming platform (Express, Drizzle, PostgreSQL, Redis, Docker, GitLab CI) and a React admin UI, and in the same period I delivered an Astro marketing site for a logistics operator with its own deploy pipeline, so separate client relationships and separate pipelines in one week is familiar ground. Before that I shipped a Next.js 14 e-commerce platform with a custom admin panel for
 2,000+ products and built Quextro, an ed-tech platform, solo from an empty repo to real users.
 
-On your stack specifically: Next.js, TypeScript and Tailwind are daily work, and my most recent
-freelance project was an Astro/Tailwind rebuild that took mobile PageSpeed from 69 to 99 with a 5.0
+On your stack specifically: Next.js, TypeScript and Tailwind are daily work, and my last freelance project was an Astro/Tailwind rebuild that took mobile PageSpeed from 69 to 99 with a 5.0
 review (danolekh.com/p/oasi-kadir). Zustand is in my regular toolkit. I haven't used Supabase by
-name, but I work with Postgres and Drizzle directly every day, hand-rolling schemas and migrations,
+name, but I work with Postgres and Drizzle directly, hand-rolling schemas and migrations,
 so the relational and auth patterns underneath are familiar ground, Supabase would be a short ramp
 rather than a new concept. I use Claude Code daily on real feature work and review everything it
 writes.
 
-I own client communication directly on my current freelance contracts, so working independently
-across two projects and talking straight to clients is already how I operate.
+On my freelance contracts I owned the client communication directly, so working independently across two projects and talking straight to clients is how I already operate.
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh
 

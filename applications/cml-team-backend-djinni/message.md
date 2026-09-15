@@ -7,8 +7,7 @@ English post, worldwide agency bench listing.
 You list Claude Code as a required skill, which is unusual to see spelled out, and it happens to
 be how I build day to day, so I wanted to lead with that.
 
-I'm a full-stack TypeScript developer with three years commercial experience. Right now I ship six
-production Node.js microservices for an iGaming platform: Express, Drizzle, PostgreSQL, Redis,
+I'm a full-stack TypeScript developer with three years commercial experience. On my last contract I shipped six production Node.js microservices for an iGaming platform: Express, Drizzle, PostgreSQL, Redis,
 Docker, GitLab CI, including money-correctness work like idempotent withdrawals keyed on the
 ledger index and single-statement bonus expiry with debit, the kind of care a regulated domain
 needs. React and Next.js are daily tools too, most recently a Next.js 14 e-commerce platform with
@@ -20,9 +19,7 @@ though the architecture is close. I haven't used Kafka, RabbitMQ, Terraform or K
 GraphQL commercially, REST is what I've shipped. My AWS is Quextro-level, not deep operational
 cloud work.
 
-Since you asked for these directly: I'm based in Vienna, Austria, EU time zone. I have roughly 10
-hours a week already committed elsewhere and can take on more depending on the project, and I'm
-open to either an hourly or a fixed-price contract. My rate is $30-35/hour, or I'll quote
+Since you asked for these directly: I'm based in Vienna, Austria, EU time zone. I can start now, and I'm open to either an hourly or a fixed-price contract. My rate is $30-35/hour, or I'll quote
 fixed-price against a defined scope.
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh

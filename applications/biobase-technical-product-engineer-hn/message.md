@@ -17,8 +17,7 @@ covering the backend if something breaks.
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh
 
-Full-stack TypeScript is my default - Node, Express, Postgres and Redis in production right now on
-a live iGaming platform, React and Next.js on the front. My Python is a second language, not
+Full-stack TypeScript is my default - Node, Express, Postgres and Redis in production on a live iGaming platform on my last contract, React and Next.js on the front. My Python is a second language, not
 FastAPI-level, and I haven't worked in Azure specifically, AWS/Vercel/Cloudflare/Railway is my
 cloud experience. Given three years commercial experience, the early-career track looks like the
 better fit, though happy to be pointed wherever makes sense.

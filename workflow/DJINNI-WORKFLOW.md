@@ -51,6 +51,12 @@ Message rules (from `playbook/proposals.md`, they transfer one to one):
   named as a present employer. Write about the iGaming platform as recent contract work in the
   past tense ("on a live iGaming platform I shipped …"), and name the company only if the post
   asks for references. Dan reads as available now (rule 7 in `playbook/proposals.md`).
+  Before posting, search the message for these and rewrite every hit: "right now", "currently",
+  "current", "at the moment", "on the side", "day job", "my week", "these days", "now I", "I ship",
+  "I run", "I work on", "I build", "I own features", "already my normal", "hours a week". Present
+  tense is fine only for skills and habits ("I use Claude Code daily", "TypeScript is my default"),
+  never for an engagement ("I ship six microservices for a platform" is out; "on my last contract I
+  shipped six microservices for a live iGaming platform" is in).
 - Name honest gaps in one plain paragraph. It has been the most-praised part of past messages.
 - Dan's voice: plain, warm, short sentences, hyphens not em-dashes, no "X not Y" flourishes, no
   labeled-list sentences. Read it back as speech.

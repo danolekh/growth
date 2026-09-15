@@ -65,7 +65,10 @@ For each `application` item:
    EU time zone; mention it for EU/Western employers, omit it for Ukrainian companies. Never
    mention a current job, day job, employer or other clients, and never write about the iGaming
    platform work in the present tense: it is recent contract work, described in the past tense,
-   company unnamed unless the post asks for references.
+   company unnamed unless the post asks for references. Before every POST, search the message
+   for "right now", "currently", "current", "at the moment", "on the side", "day job", "my week",
+   "now I", "I ship", "I run", "I work on", "I build", "hours a week" and rewrite each hit;
+   present tense is only for skills and habits, never for an engagement.
    Discord posts (source `effect` or `discord`, or any job whose url is a discord.com link):
    `message` is a direct message to the poster, under 900 characters, first line names their
    product, ends with one concrete question; put a 2–3 sentence public thread reply into

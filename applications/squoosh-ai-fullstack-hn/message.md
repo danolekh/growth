@@ -6,10 +6,9 @@ Apply to: tyler@squoosh.ai, subject "HN — Full Stack".
 ## Message (send this)
 
 Simulating how a real shopper explores a site to catch what's broken before a person does is a
-sharp way to test commerce UX, and it's close to what I already build day to day.
+sharp way to test commerce UX, and it's close to the kind of thing I build.
 
-I'm a full-stack TypeScript developer, three years commercial. Right now I own features end to end
-on an iGaming platform: Node and Express microservices, Postgres and Redis, the schema and the
+I'm a full-stack TypeScript developer, three years commercial. On my last contract I owned features end to end on an iGaming platform: Node and Express microservices, Postgres and Redis, the schema and the
 ledger logic, plus the React admin UI on top. Before that I built Quextro solo, an ed-tech platform
 from an empty repo to real users now used by British teachers and students - Bun and Postgres with
 Drizzle on the back, React and TanStack on the front, CI/CD and observability around it. My own
