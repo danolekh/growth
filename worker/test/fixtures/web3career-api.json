@@ -1,0 +1,58 @@
+[
+  "web3.career jobs api v1 — attribution required: https://web3.career",
+  100,
+  [
+    {
+      "id": 118201,
+      "title": "Junior Frontend Developer (React, wagmi)",
+      "company": "Basefolio",
+      "location": "Remote",
+      "country": "Worldwide",
+      "date": "2026-09-14T09:12:00+00:00",
+      "date_epoch": 1789463520,
+      "apply_url": "https://web3.career/junior-frontend-developer-react-wagmi-basefolio/118201",
+      "description": "<p>We build a portfolio dashboard on Base. You will ship React/Next.js screens with wagmi and viem, TypeScript end to end. Strong portfolio beats years.</p><ul><li>React, TypeScript</li><li>wagmi, viem</li></ul>",
+      "tags": ["react", "typescript", "wagmi", "viem", "frontend"],
+      "is_remote": true
+    },
+    {
+      "id": 118177,
+      "title": "Senior Rust Engineer - Protocol",
+      "company": "Chainlab",
+      "location": "Remote",
+      "country": "United States",
+      "date": "2026-09-13T18:00:00+00:00",
+      "date_epoch": 1789408800,
+      "apply_url": "https://web3.career/senior-rust-engineer-protocol-chainlab/118177",
+      "description": "<p>Rust, consensus, p2p networking. US only.</p>",
+      "tags": "rust,protocol,senior",
+      "is_remote": true
+    },
+    {
+      "id": 118150,
+      "title": "Full Stack Engineer (TypeScript) – Remote",
+      "company": "Mintline",
+      "location": "Remote",
+      "country": "Germany",
+      "date": "2026-09-13T07:30:00+00:00",
+      "date_epoch": 1789371000,
+      "apply_url": "https://web3.career/full-stack-engineer-typescript-remote-mintline/118150",
+      "description": "<p>Node.js indexer + Next.js dashboard for an NFT marketplace on Ethereum. ethers.js, Postgres, EU time zones.</p>",
+      "tags": ["typescript", "node", "nextjs", "ethers"],
+      "is_remote": true
+    },
+    {
+      "id": 117001,
+      "title": "Solidity Developer",
+      "company": "Oldcoin",
+      "location": "Remote",
+      "country": "Worldwide",
+      "date": "2026-08-20T10:00:00+00:00",
+      "date_epoch": 1787306400,
+      "apply_url": "https://web3.career/solidity-developer-oldcoin/117001",
+      "description": "<p>Stale posting, three weeks old. Solidity, Foundry.</p>",
+      "tags": ["solidity", "foundry"],
+      "is_remote": true
+    }
+  ]
+]

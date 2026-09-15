@@ -15,7 +15,7 @@ export const jobs = sqliteTable(
   {
     /** `<source>:<external_id>`, e.g. `djinni:848006`. */
     id: text("id").primaryKey(),
-    source: text("source").notNull(), // djinni | upwork | linkedin | hn | effect | discord
+    source: text("source").notNull(), // djinni | upwork | linkedin | hn | effect | discord | web3career | cryptojobslist | hireweb3 | remote3 | hashtagweb3
     externalId: text("external_id").notNull(),
     url: text("url").notNull().unique(),
     title: text("title").notNull(),

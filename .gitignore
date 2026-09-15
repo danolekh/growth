@@ -8,3 +8,4 @@ node_modules/
 worker/dist/
 me/resume/out/*.html
 routines/*.local.md
+.wrangler/

@@ -4,7 +4,7 @@
  * reads them back from the environment. Secrets stay `Redacted` until the one place that needs
  * the raw string.
  */
-import { Config, Context, Effect, Layer, Option, type Redacted } from "effect";
+import { Config, Context, Effect, Layer, Option, Redacted } from "effect";
 
 export interface TelegramCredentials {
   readonly botToken: Redacted.Redacted<string>;
@@ -36,6 +36,8 @@ export class Settings extends Context.Service<
     /** Total (out of 20) at or above which a job is an apply / apply-low; tune from the summary data. */
     readonly scoreApplyMin: number;
     readonly scoreLowMin: number;
+    /** web3.career API token (free, attribution required); the source is skipped without it. */
+    readonly webThreeCareerToken: Option.Option<Redacted.Redacted<string>>;
   }
 >()("growth/Settings") {
   static readonly layer = Layer.effect(Settings)(
@@ -66,6 +68,8 @@ export class Settings extends Context.Service<
           .filter((n) => Number.isInteger(n) && n >= 0 && n < 24),
         scoreApplyMin: yield* Config.number("SCORE_APPLY_MIN").pipe(Config.withDefault(15)),
         scoreLowMin: yield* Config.number("SCORE_LOW_MIN").pipe(Config.withDefault(12)),
+        // An empty WEB3_CAREER_TOKEN= line in .env counts as unset.
+        webThreeCareerToken: Option.filter(yield* Config.option(Config.redacted("WEB3_CAREER_TOKEN")), (t) => Redacted.value(t).trim().length > 0),
       };
     }),
   );

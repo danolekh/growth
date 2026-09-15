@@ -26,8 +26,12 @@ import { Settings } from "./Settings.ts";
 import { nextCronLocal } from "./Time.ts";
 import { HttpClient } from "effect/unstable/http";
 import { now, Repo, type DraftRow, type JobRow, type NewJob, type ScoreRow } from "./Repo.ts";
-import { detectLanguage, Scorer, type ScoreInput } from "./Scorer.ts";
+import { detectLanguage, laneFor, Scorer, type ScoreInput } from "./Scorer.ts";
 import { Telegram } from "./Telegram.ts";
+import { fetchHashtagWeb3, HASHTAGWEB3_SITE } from "./HashtagWeb3.ts";
+import { fetchWeb3Career, WEB3_CAREER_SITE } from "./Web3Career.ts";
+import { fetchWeb3Feed, WEB3_BOARDS, type Web3Board } from "./Web3Feeds.ts";
+import { web3Config, web3Verdict, type Web3Source } from "./Web3Lane.ts";
 
 const parseJson = <T>(s: string | null, fallback: T): T => {
   if (!s) return fallback;
@@ -222,6 +226,128 @@ export const ingestDiscordPosts = Effect.fn("Ingest.discordPosts")(function* (po
   return { received: posts.length, inserted: rows.length };
 });
 
+// ---------- web3 lane ----------
+
+interface Web3Candidate {
+  readonly externalId: string;
+  readonly url: string;
+  readonly title: string;
+  readonly company: string | null;
+  readonly location: string | null;
+  readonly postedAt: string | null;
+  readonly ageHours: number;
+  readonly description: string;
+}
+
+/**
+ * Shared tail of every web3 source: drop stale items (when the feed dates them), dedupe, run the
+ * lane verdict and insert. Kept rows land `enriched` (nothing to fetch) and score next tick.
+ */
+const ingestWeb3Candidates = Effect.fn("Ingest.web3Candidates")(function* (source: Web3Source, candidates: ReadonlyArray<Web3Candidate>) {
+  const repo = yield* Repo;
+  const fresh = candidates.filter((c) => Number.isNaN(c.ageHours) || c.ageHours <= web3Config.maxAgeHours);
+  const seen = yield* repo.existingJobIds(fresh.map((c) => `${source}:${c.externalId}`));
+  const rows: NewJob[] = [];
+  let kept = 0;
+  for (const c of fresh) {
+    const id = `${source}:${c.externalId}`;
+    if (seen.has(id)) continue;
+    const verdict = web3Verdict(c.title, c.description, c.location);
+    const remote = !c.location || /remote|worldwide|anywhere|global/i.test(c.location);
+    rows.push({
+      id,
+      source,
+      externalId: c.externalId,
+      url: c.url,
+      title: c.title,
+      company: c.company,
+      description: c.description.slice(0, 6000),
+      postedAt: c.postedAt,
+      firstSeenAt: now(),
+      updatedAt: now(),
+      keywords: JSON.stringify(["web3"]),
+      flags: JSON.stringify(verdict.flags),
+      filterReason: verdict.keep ? null : (verdict.reason ?? "filtered"),
+      status: verdict.keep ? "enriched" : "skipped",
+      hot: verdict.keep && verdict.hot ? 1 : 0,
+      detail: JSON.stringify({ detail_error: `${source}-feed`, work_format: remote ? "Remote" : c.location, countries: c.location ?? undefined }),
+    });
+    if (verdict.keep) kept++;
+  }
+  if (rows.length) yield* repo.insertJobs(rows);
+  return { source, received: candidates.length, fresh: fresh.length, inserted: rows.length, kept };
+});
+
+/** One of the three RSS boards (CryptoJobsList, hireweb3, remote3), once a day each. */
+export const ingestWeb3Feed = Effect.fn("Ingest.web3Feed")(function* (board: Web3Board) {
+  const client = yield* HttpClient.HttpClient;
+  const items = yield* fetchWeb3Feed(client, board);
+  return yield* ingestWeb3Candidates(
+    board,
+    items.map((i) => ({
+      externalId: i.id,
+      url: i.link,
+      title: i.title,
+      company: i.company,
+      location: i.location,
+      postedAt: i.postedAt,
+      ageHours: i.ageHours,
+      description: [i.description, i.location ? `Location: ${i.location}` : null, `Board: ${WEB3_BOARDS[board].site}`].filter(Boolean).join("\n"),
+    })),
+  );
+});
+
+/**
+ * hashtagweb3 lists engineering roles from web3 companies' ATS boards without a description, so
+ * the row's text is the listing itself: title, company, location, department and the board.
+ */
+export const ingestHashtagWeb3 = Effect.fn("Ingest.hashtagWeb3")(function* () {
+  const client = yield* HttpClient.HttpClient;
+  const jobs = yield* fetchHashtagWeb3(client);
+  return yield* ingestWeb3Candidates(
+    "hashtagweb3",
+    jobs.map((j) => ({
+      externalId: j.id,
+      url: j.url,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      postedAt: j.postedAt,
+      ageHours: j.ageHours,
+      description: [j.title, j.company ? `Company: ${j.company}` : null, j.location ? `Location: ${j.location}` : null, j.department ? `Department: ${j.department}` : null, `Board: ${HASHTAGWEB3_SITE} (web3 jobs)`]
+        .filter(Boolean)
+        .join("\n"),
+    })),
+  );
+});
+
+/** web3.career's API, remote roles only; skipped entirely until WEB3_CAREER_TOKEN is set. */
+export const ingestWeb3Career = Effect.fn("Ingest.web3Career")(function* () {
+  const client = yield* HttpClient.HttpClient;
+  const settings = yield* Settings;
+  if (Option.isNone(settings.webThreeCareerToken)) return { source: "web3career" as const, skipped: "no token" };
+  const jobs = yield* fetchWeb3Career(client, settings.webThreeCareerToken.value);
+  return yield* ingestWeb3Candidates(
+    "web3career",
+    jobs.map((j) => ({
+      externalId: j.id,
+      url: j.url,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      postedAt: j.postedAt,
+      ageHours: j.ageHours,
+      description: [j.description, j.tags.length ? `Tags: ${j.tags.join(", ")}` : null, j.location ? `Location: ${j.location}` : null, `Board: ${WEB3_CAREER_SITE}`]
+        .filter(Boolean)
+        .join("\n"),
+    })),
+  );
+});
+
+/** One web3 source by name, for the tick schedule and the admin trigger. */
+export const ingestWeb3Source = (source: Web3Source) =>
+  source === "hashtagweb3" ? ingestHashtagWeb3() : source === "web3career" ? ingestWeb3Career() : ingestWeb3Feed(source);
+
 /** Jobs that arrived by email already carry all we will ever know; they skip the page fetch. */
 export const ingestExtracted = Effect.fn("Ingest.extracted")(function* (extracted: ReadonlyArray<ExtractedJob>) {
   const repo = yield* Repo;
@@ -319,6 +445,7 @@ export const scoreEnriched = Effect.fn("Ingest.scoreEnriched")(function* (limit:
       detail: jobDetail(job) as Record<string, unknown>,
       flags: jobFlags(job),
       language: detectLanguage(`${job.title}\n${job.description}`),
+      lane: laneFor(job.source, jobFlags(job)),
     };
     const result = yield* scorer.score(input).pipe(
       Effect.map((r) => ({ ok: true as const, r })),

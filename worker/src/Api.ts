@@ -9,7 +9,7 @@ import { HttpServerResponse } from "effect/unstable/http";
 import { Background } from "./Bindings.ts";
 import { appliedLine, applyPackage, draftKeyboard, formSettingsText, packageKeyboard, undoKeyboard, type Answer } from "./Cards.ts";
 import { BadRequest } from "./Errors.ts";
-import { cardFor, cardPendingDrafts, ingestDiscordPosts, ingestDjinniKeyword, jobDetail } from "./Ingest.ts";
+import { cardFor, cardPendingDrafts, ingestDiscordPosts, ingestDjinniKeyword, ingestWeb3Source, jobDetail } from "./Ingest.ts";
 import { Kv } from "./Kv.ts";
 import { newId, now, Repo } from "./Repo.ts";
 import { Routine } from "./Routine.ts";
@@ -18,6 +18,7 @@ import { dailySummary } from "./Summary.ts";
 import { escapeHtml, Telegram } from "./Telegram.ts";
 import { isDiscordUrl, splitQuestions, unwrap } from "./Text.ts";
 import { runTick } from "./Tick.ts";
+import { isWeb3Source, WEB3_SOURCES } from "./Web3Lane.ts";
 
 // ---------- schemas for what comes in ----------
 
@@ -675,6 +676,11 @@ export const handleRequest = Effect.fn("Api.handleRequest")(
         const body = yield* decodeBody(ResumeFileBody)(req);
         yield* kv.put(`tg:file:${body.variant}`, body.fileId);
         return json({ ok: true });
+      }
+      if (path === "/api/admin/ingest-web3" && method === "POST") {
+        const source = url.searchParams.get("source") ?? "";
+        if (!isWeb3Source(source)) return yield* BadRequest.make({ message: `source must be one of ${WEB3_SOURCES.join(", ")}` });
+        return json(yield* ingestWeb3Source(source));
       }
       if (path === "/api/admin/ingest-discord" && method === "POST") {
         const body = yield* decodeBody(DiscordPostsBody)(req);

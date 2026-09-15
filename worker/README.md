@@ -11,6 +11,7 @@ src/Ingest.ts         jobs pipeline (new → enriched → scored → drafted →
 src/Djinni.ts         RSS + public job-page parsing and the deterministic filters
 src/HackerNews.ts     "Who is hiring?" via Algolia, one page per hour, remote + on-stack only
 src/EffectJobs.ts     effect.website/effect-jobs directory, once a day, remote cards land hot
+src/Web3Lane.ts       the web3 lane verdict (web3-config.json); Web3Feeds / HashtagWeb3 / Web3Career sources
 src/Email*.ts         jobs@danolekh.com: classify alerts and messages, extract job links
 src/Score.ts          Workers AI scoring (JSON schema), OpenRouter fallback
 src/Telegram.ts       bot client (from the sportmagaz worker) + cards in src/Cards.ts
@@ -86,6 +87,31 @@ the cookie expires the daily summary says so.
 Discord reading: `POST /api/admin/ingest-discord` (admin token) takes
 `{ posts: [{ id, channel, author, authorId?, content, url, createdAt }] }` from the Mac-side bot
 described in `../hermes/discord-forwarder.md`; posts become hot `discord` jobs and get DM cards.
+
+## Web3 lane
+A second lane for EVM-flavoured roles (React/Next.js + wagmi/viem, Node indexers), scored with its
+own rubric (`Lane: web3` in the prompt; see `SYSTEM_PROMPT` in `src/Scorer.ts`). Rows carry
+`keywords: ["web3"]`, a `web3` flag, land `enriched` (no page fetch) and score on the next ticks.
+Djinni and Hacker News posts that mention Solidity/web3/viem/wagmi also get the `web3` flag.
+
+Sources (`src/Web3Feeds.ts`, `src/HashtagWeb3.ts`, `src/Web3Career.ts`), one per fire, Vienna time:
+
+| source           | feed                                              | when  |
+| ---------------- | ------------------------------------------------- | ----- |
+| `cryptojobslist` | https://api.cryptojobslist.com/jobs.rss (undated) | 10:00 |
+| `hireweb3`       | https://hireweb3.io/job/rss                       | 10:05 |
+| `remote3`        | https://www.remote3.co/api/rss                    | 10:10 |
+| `web3career`     | https://web3.career/api/v1 (token, remote only)   | 11:00 |
+| `hashtagweb3`    | https://hashtagweb3.com/api/v1/jobs (no text)     | 11:05 |
+
+- Filters live in `web3-config.json` (`mustMatchAny`, `titleExclude`, `titleBoost`, `regionSkip`,
+  `maxAgeHours` = 72; undated items are never treated as stale). `src/Web3Lane.ts` turns them into
+  `web3Verdict(title, description, location)`; a junior/entry/graduate/associate title is hot.
+- `WEB3_CAREER_TOKEN` in `.env`: free token from https://web3.career/web3-jobs-api (attribution
+  required). Empty = the `web3career` source reports `{ skipped: "no token" }`.
+- On demand: `POST $WORKER_URL/api/admin/ingest-web3?source=<name>` with the admin token runs one
+  source and returns `{ source, received, fresh, inserted, kept }`.
+- Cards use 🟡 for all five sources.
 
 ## Budget notes (free plan)
 10 ms CPU and 50 subrequests per invocation, one cron trigger, 10k Workers AI neurons/day. The

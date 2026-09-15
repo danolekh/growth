@@ -12,6 +12,7 @@ import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstab
 import { WorkersAi } from "./Bindings.ts";
 import { ScoreError } from "./Errors.ts";
 import { Settings } from "./Settings.ts";
+import { isWeb3Source } from "./Web3Lane.ts";
 
 export interface ScoreInput {
   readonly title: string;
@@ -22,7 +23,12 @@ export interface ScoreInput {
   readonly flags: ReadonlyArray<string>;
   /** Decided by script, not by the model: uk when the post is mostly Cyrillic. */
   readonly language: "en" | "uk";
+  /** web3 when the post is flagged `web3` or came from a web3 board; switches the rubric. */
+  readonly lane: "ts" | "web3";
 }
+
+export const laneFor = (source: string, flags: ReadonlyArray<string>): ScoreInput["lane"] =>
+  flags.includes("web3") || isWeb3Source(source) ? "web3" : "ts";
 
 export interface ScoreResult {
   readonly skills_fit: number;
@@ -66,11 +72,14 @@ export const SYSTEM_PROMPT = `You score job posts for Daniil, a full-stack TypeS
 - stackability: small team, async, product company, ownership, part-time possible = 5; outstaff scrum team with daily calls and strict 9-6 overlap = 1.
 - signal: real company with a specific post = 5; recycled template, vague, salary hidden = 2.
 language: copy the "Language" line from the input.
-summary: two short lines, written in that language (uk = Ukrainian, en = English), saying what the job is and the one thing that makes it a fit or not. Return JSON only.`;
+summary: two short lines, written in that language (uk = Ukrainian, en = English), saying what the job is and the one thing that makes it a fit or not. Return JSON only.
+
+Web3 lane (when the input says "Lane: web3"): Daniil is new to EVM (since Sep 2026) with shipped, verified work on Base: a USDC milestone escrow contract with fuzz and invariant tests, an Effect-based event indexer, and effect-viem. skills_fit: React/Next.js/TypeScript + wagmi/viem full-stack or frontend = 5; Node/indexer/backend for a web3 product = 4; Solidity-first roles asking 2+ years of production contracts = 2; Rust/Solana/Move/protocol work = 1. winnability: junior/entry/graduate title, 'strong portfolio', remote worldwide or EU = 5; senior-only or US-only = 1.`;
 
 const userPrompt = (input: ScoreInput) =>
   [
     `Source: ${input.source}`,
+    ...(input.lane === "web3" ? ["Lane: web3"] : []),
     `Title: ${input.title}`,
     `Company: ${input.company ?? "unknown"}`,
     `Flags: ${input.flags.join(", ") || "none"}`,

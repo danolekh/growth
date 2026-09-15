@@ -10,6 +10,7 @@ import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstab
 
 import { decode, toText } from "./Djinni.ts";
 import { DjinniFetchError } from "./Errors.ts";
+import { WEB3_STACK } from "./Web3Lane.ts";
 
 export interface HnThread {
   readonly id: string;
@@ -43,7 +44,7 @@ export const parseThread = (json: any): HnThread | null => {
   return hit ? { id: String(hit.objectID), title: String(hit.title), createdAt: String(hit.created_at), comments: Number(hit.num_comments ?? 0) } : null;
 };
 
-const STACK = /\b(typescript|react|next\.?js|node(\.js)?|tanstack|effect[- ]?ts|astro|remix|bun|drizzle|postgres)\b/i;
+const STACK = /\b(typescript|react|next\.?js|node(\.js)?|tanstack|effect[- ]?ts|astro|remix|bun|drizzle|postgres|solidity|viem|wagmi|ethers|evm|web3|foundry)\b/i;
 const REMOTE = /\bremote\b/i;
 // No outer \b: several alternatives start or end with punctuation, which has no word boundary.
 const US_ONLY = /(\bus[- ]only\b|\bus[- ]based\b|\bunited states\b|\(\s*usa?\s*(?:only|time ?zones?|based)?\s*\)|\bus time ?zones?\b|\bus citizens?\b|\bnorth america\b|remote,?\s*usa?\b|\busa\b|\bus\/canada\b|\bcanada\/us\b)/i;
@@ -72,6 +73,7 @@ export const parsePage = (json: any, threadId: string): HnPage => {
     if (/part[- ]?time/i.test(text)) flags.push("part-time");
     if (STACK.test(text) && /\b(tanstack|effect[- ]?ts|astro|drizzle)\b/i.test(text)) flags.push("niche-stack");
     if (ONSITE_ONLY.test(firstLine) && !REMOTE.test(firstLine)) flags.push("onsite");
+    if (WEB3_STACK.test(text)) flags.push("web3");
     posts.push({
       id: String(h.objectID),
       url: `https://news.ycombinator.com/item?id=${h.objectID}`,

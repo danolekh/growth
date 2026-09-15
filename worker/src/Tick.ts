@@ -9,17 +9,26 @@
 import { Effect } from "effect";
 
 import { djinniConfig } from "./Djinni.ts";
-import { cardPendingDrafts, cardScored, enrichDjinni, ingestDjinniKeyword, ingestEffectJobs, ingestHackerNews, scoreEnriched } from "./Ingest.ts";
+import { cardPendingDrafts, cardScored, enrichDjinni, ingestDjinniKeyword, ingestEffectJobs, ingestHackerNews, ingestWeb3Source, scoreEnriched } from "./Ingest.ts";
 import { Kv } from "./Kv.ts";
 import { now, Repo } from "./Repo.ts";
 import { Routine } from "./Routine.ts";
 import { Settings } from "./Settings.ts";
 import { dailySummary, housekeeping, weeklySummary } from "./Summary.ts";
 import { inSlot, localTime } from "./Time.ts";
+import type { Web3Source } from "./Web3Lane.ts";
 
 const ENRICH_PER_TICK = 3;
 const SCORE_PER_TICK = 3;
 const CARDS_PER_TICK = 4;
+/** The web3 boards, one per fire, spread over the late morning (Vienna). */
+const WEB3_SCHEDULE: ReadonlyArray<readonly [string, Web3Source]> = [
+  ["10:00", "cryptojobslist"],
+  ["10:05", "hireweb3"],
+  ["10:10", "remote3"],
+  ["11:00", "web3career"],
+  ["11:05", "hashtagweb3"],
+];
 
 /** A failing step logs and yields its fallback; the rest of the tick still runs. */
 const swallow =
@@ -58,6 +67,11 @@ export const runTick = Effect.fn("Tick.run")(function* (scheduledTime: number, o
 
   // 1c. The Effect job directory, once a day at 09:00 local.
   if (local.hour === 9 && local.minute < 5) stats.effect = yield* ingestEffectJobs().pipe(swallow("effect", { error: true }));
+
+  // 1d. The web3 lane: one board per fire, each once a day.
+  for (const [hhmm, source] of WEB3_SCHEDULE) {
+    if (inSlot(local, hhmm)) stats[source] = yield* ingestWeb3Source(source).pipe(swallow(source, { error: true }));
+  }
 
   // 2. Enrich, 3. score, 4. card.
   stats.enriched = yield* enrichDjinni(ENRICH_PER_TICK).pipe(swallow("enrich", 0));

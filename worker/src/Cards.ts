@@ -31,7 +31,19 @@ export interface CardDraft {
   readonly language: string | null;
 }
 
-const sourceIcon: Record<string, string> = { djinni: "🟢", upwork: "🟩", linkedin: "🔵", hn: "🟠", effect: "🟣", discord: "💬" };
+const sourceIcon: Record<string, string> = {
+  djinni: "🟢",
+  upwork: "🟩",
+  linkedin: "🔵",
+  hn: "🟠",
+  effect: "🟣",
+  discord: "💬",
+  web3career: "🟡",
+  cryptojobslist: "🟡",
+  hireweb3: "🟡",
+  remote3: "🟡",
+  hashtagweb3: "🟡",
+};
 
 export const jobCard = (job: CardJob, score: CardScore | null, draft: CardDraft | null): string => {
   const d = job.detail ?? {};

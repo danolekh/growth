@@ -8,6 +8,7 @@ import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstab
 
 import config from "../djinni-config.json";
 import { DjinniFetchError } from "./Errors.ts";
+import { WEB3_STACK } from "./Web3Lane.ts";
 
 export interface DjinniConfig {
   keywords: string[];
@@ -145,6 +146,7 @@ export const rssVerdict = (item: { title: string; ageHours: number }, descriptio
   if (/\b(astro|tanstack|drizzle|effect[- ]?ts|\bbun\b|hono)\b/i.test(hay)) flags.push("niche-stack");
   if (/\b(claude|cursor|copilot|ai[- ]assisted|ai tools)\b/i.test(hay)) flags.push("ai-tools");
   if (/\b(1-3|one to three|small team|only engineer|sole engineer|founding)\b/i.test(hay)) flags.push("small-team");
+  if (WEB3_STACK.test(hay)) flags.push("web3");
   return { keep: true, reason: "", flags };
 };
 
