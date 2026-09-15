@@ -20,7 +20,7 @@ services for a live iGaming platform."
    milestones, freelancer submits, client releases or the review window expires and the freelancer
    claims. Foundry, Solidity 0.8, OpenZeppelin (SafeERC20, ReentrancyGuard), unit + fuzz + invariant
    tests, slither in CI. Frontend: wagmi v2 + viem + TanStack Start on Cloudflare Workers.
-   - Repo: https://github.com/danolekh/milestone-escrow (TBD until pushed)
+   - Repo: https://github.com/danolekh/milestone-escrow (public since 2026-09-15; 77 tests, 100% line and branch coverage)
    - Base Sepolia: TBD · Base mainnet: TBD · Demo: https://escrow.danolekh.com (TBD)
    - Write-up: https://www.danolekh.com/b/usdc-escrow-on-base (TBD) · Page: /p/milestone-escrow (TBD)
 2. **evm-ledger-indexer** — reorg-safe double-entry ledger built from on-chain events (escrow events
