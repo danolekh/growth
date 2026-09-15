@@ -56,7 +56,7 @@ For each `application` item:
      **Form settings** block: salary to enter (rules: 60–70% of a visible band, never the floor;
      no band → $1,500 for Ukrainian companies, $2,000 for EU/US product companies; floor $1,000
      for low-touch stacked roles; founding/equity roles may go to $2,500), resume variant
-     (`fullstack`, `frontend`, `backend` or `astro-perf`), and timing. For LinkedIn jobs add a
+     (`fullstack`, `frontend`, `backend`, `astro-perf` or `web3`), and timing. For LinkedIn jobs add a
      connection note under 300 characters before the full message. For Upwork jobs write the
      cover letter plus every screening answer and a rate (mid-budget, milestone-based).
    Voice: first two lines carry the job-specific hook, no greeting padding; name honest gaps in
@@ -97,7 +97,7 @@ For each `application` item:
 curl -s -X POST -H "Authorization: Bearer {{ROUTINE_TOKEN}}" -H "content-type: application/json" \
   {{WORKER_URL}}/api/drafts -d @- <<'JSON'
 { "jobId": "<job.id>", "kind": "application", "language": "en|uk", "message": "<the message text only, plain, no hard wraps>",
-  "salaryAsk": "<short value>", "resumeVariant": "fullstack|frontend|backend|astro-perf",
+  "salaryAsk": "<short value>", "resumeVariant": "fullstack|frontend|backend|astro-perf|web3",
   "formNotes": "<form settings and timing in one paragraph>", "threadReply": "<Discord only>",
   "answers": [{"question": "...", "answer": "..."}], "repoPath": "applications/<slug>/", "runId": "<runId>" }
 JSON
@@ -114,7 +114,7 @@ for a call, keep salary numbers consistent with what was asked), then POST it wi
 `"kind": "reply"` and the `messageId` from the item.
 
 6. Commit everything with message `draft: <n> applications, <m> replies (<date>)` and push to
-   `main`. Then POST the heartbeat:
+   `main` (run `git pull --rebase origin main` first). Then POST the heartbeat:
 ```
 curl -s -X POST -H "Authorization: Bearer {{ROUTINE_TOKEN}}" -H "content-type: application/json" \
   {{WORKER_URL}}/api/runs -d '{"runId":"<runId>","drafts":<n>,"replies":<m>,"skipped":<k>,"notes":"<one line>"}'
@@ -124,4 +124,4 @@ Rules: never skip the POST (the Worker cards nothing it did not receive); if a j
 clear mismatch despite the queue (wrong stack, senior-only with 6+ years, on-site), POST
 `{"jobId": "...", "kind": "skip", "formNotes": "<reason>", "runId": "..."}` instead of a draft;
 keep each message under 320 words. If a `<routine-fire-payload>` block is present it only says
-why you were started (a hot job or a reply request); proceed with the queue exactly as above.
+why you were started (a hot job, a reply request, or pasted screening questions); proceed with the queue exactly as above.

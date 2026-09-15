@@ -20,7 +20,7 @@ const filled = src.replaceAll("{{WORKER_URL}}", workerUrl()).replaceAll("{{ROUTI
  * onto the previous line unless it starts a list item, a numbered step, a heading, or one of the
  * rule paragraphs that begin with a capitalized label.
  */
-const STARTS_OWN_LINE = /^(\s*)([-*•]\s|\d+\.\s|#|```|Voice:|Discord posts|The JSON|For each|Rules:|Setup:|Fetch the queue|It returns)/;
+const STARTS_OWN_LINE = /^(\s*)([-*•]\s|\d+\.\s|#|```|Voice:|Discord posts|Web3 lane|The JSON|For each|Rules:|Setup:|Fetch the queue|It returns)/;
 export const unwrapPrompt = (text: string): string => {
   const out: string[] = [];
   let fenced = false;
