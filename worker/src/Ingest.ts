@@ -364,7 +364,7 @@ export const cardScored = Effect.fn("Ingest.cardScored")(function* (limit: numbe
   const settings = yield* Settings;
   const rows = yield* repo.jobsWithoutCard(limit);
   const next = nextCronLocal(settings.routineCronHoursUtc);
-  const footer = `⏳ Drafted at the ${next.label} run${next.tomorrow ? " tomorrow" : ""}; Draft it = now.`;
+  const footer = `⏳ The writer picks this up at ${next.label}${next.tomorrow ? " tomorrow" : ""}; tap Draft it to start it now.`;
   let sent = 0;
   for (const { job, score } of rows) {
     const messageId = yield* telegram

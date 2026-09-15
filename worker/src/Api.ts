@@ -145,7 +145,12 @@ const draftWithJob = Effect.fn("Api.draftWithJob")(function* (draftId: string) {
  * Render the package into the draft's own card: header, copyable text, screening answers,
  * form settings, and the buttons. Falls back to separate messages only when it is too long.
  */
-const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string) {
+/**
+ * `resend` moves the message to the bottom of the chat (a fresh message with a note on top, the
+ * old one deleted) so a change Dan is waiting for is where he looks, instead of a silent edit
+ * somewhere above.
+ */
+const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string, resend?: string) {
   const repo = yield* Repo;
   const telegram = yield* Telegram;
   const found = yield* draftWithJob(draftId);
@@ -159,13 +164,17 @@ const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string) {
   const questions = draft.questions ? parseQuestionsJson(draft.questions) : (jobDetail(job).questions ?? []);
   const keyboard = packageKeyboard(draft.id, job.url, { discord, hasAnswers: answers.length > 0, hasQuestions: questions.length > 0 });
   const header = card.split("\n").slice(0, 3).join("\n");
-  const pkg = applyPackage(header, message, formSettingsText(draft), answers, threadReply, discord);
-  if (pkg.length <= 4000 && draft.tgMessageId) {
+  const body = applyPackage(header, message, formSettingsText(draft), answers, threadReply, discord);
+  const pkg = resend ? `${resend}\n${body}` : body;
+  if (!resend && pkg.length <= 4000 && draft.tgMessageId) {
     const edited = yield* telegram.edit(draft.tgMessageId, pkg, { keyboard }).pipe(Effect.as(true), Effect.catch(() => Effect.succeed(false)));
     if (edited) return true;
   }
-  const mid = yield* telegram.send(pkg.length <= 4000 ? pkg : `✅ <b>Applying</b>\n${header}`, { keyboard }).pipe(Effect.catch(() => Effect.succeed(-1)));
-  if (mid > 0) yield* repo.updateDraft(draft.id, { tgMessageId: mid });
+  const mid = yield* telegram.send(pkg.length <= 4000 ? pkg : `${resend ? `${resend}\n` : ""}✅ <b>Applying</b>\n${header}`, { keyboard }).pipe(Effect.catch(() => Effect.succeed(-1)));
+  if (mid > 0) {
+    yield* repo.updateDraft(draft.id, { tgMessageId: mid });
+    if (resend && draft.tgMessageId) yield* retireMessage(draft.tgMessageId, job.title);
+  }
   if (pkg.length > 4000) {
     yield* telegram.send(`<pre>${escapeHtml(message)}</pre>`, { disablePreview: true });
     for (const a of answers) yield* telegram.send(`<b>${escapeHtml(a.question)}</b>\n<pre>${escapeHtml(a.answer)}</pre>`);
@@ -173,6 +182,30 @@ const showPackage = Effect.fn("Api.showPackage")(function* (draftId: string) {
     yield* telegram.send(formSettingsText(draft));
   }
   return mid > 0;
+});
+
+/** Delete a superseded message, or collapse it when Telegram no longer allows the delete. */
+const retireMessage = Effect.fn("Api.retireMessage")(function* (messageId: number, title: string) {
+  const telegram = yield* Telegram;
+  yield* telegram.delete(messageId).pipe(
+    Effect.catch(() => telegram.edit(messageId, `↓ ${escapeHtml(title)} moved below`).pipe(Effect.ignore)),
+  );
+});
+
+/** Move a draft's card to the bottom of the chat with a note on top; the package when it is open. */
+const resendCard = Effect.fn("Api.resendCard")(function* (draftId: string, note: string) {
+  const repo = yield* Repo;
+  const telegram = yield* Telegram;
+  const found = yield* draftWithJob(draftId);
+  if (!found) return false;
+  const { draft, job, card } = found;
+  if (draft.status === "approved") return yield* showPackage(draft.id, note);
+  if (!["carded", "later"].includes(draft.status)) return false;
+  const mid = yield* telegram.send(`${note}\n${card}`, { keyboard: draftKeyboard(draft.id) }).pipe(Effect.catch(() => Effect.succeed(-1)));
+  if (mid <= 0) return false;
+  yield* repo.updateDraft(draft.id, { tgMessageId: mid });
+  if (draft.tgMessageId) yield* retireMessage(draft.tgMessageId, job.title);
+  return true;
 });
 
 /** Apply: open the package. Nothing is recorded as sent until Dan taps Applied. */
@@ -240,7 +273,10 @@ const onQuestionsReply = Effect.fn("Api.onQuestionsReply")(function* (draftId: s
   if (!moved) return "That draft is closed";
   yield* repo.insertEvent({ draftId, kind: "questions", payload: JSON.stringify(questions), at: now() });
   const fired = yield* routine.fire(`questions for ${draftId}`);
-  yield* telegram.send(`Got ${questions.length} question${questions.length > 1 ? "s" : ""}. ${routine.explain(fired)}`, { silent: true });
+  yield* telegram.send(
+    `Got ${questions.length} question${questions.length > 1 ? "s" : ""}. ${routine.explain(fired)} The card comes back at the bottom of the chat with the answers.`,
+    { silent: true },
+  );
   return "Queued";
 });
 
@@ -497,8 +533,7 @@ const acceptDraft = Effect.fn("Api.acceptDraft")(function* (body: typeof DraftBo
     const draft = yield* repo.draftById(body.draftId);
     if (!draft) return { ok: false, error: "unknown draft" };
     yield* repo.updateDraft(draft.id, { answers: JSON.stringify(answers), runId: body.runId ?? draft.runId });
-    if (draft.status === "approved" && draft.tgMessageId) yield* showPackage(draft.id);
-    else if (draft.tgMessageId) yield* telegram.send(`❓ Answers ready for <b>${escapeHtml(draft.jobId ?? "")}</b>; they show on Apply.`, { silent: true });
+    yield* resendCard(draft.id, `❓ <b>Answers added</b> (${answers.length})`);
     return { ok: true };
   }
 
@@ -626,6 +661,10 @@ export const handleRequest = Effect.fn("Api.handleRequest")(
       if (path === "/api/admin/tick" && method === "POST") {
         yield* runTick(Date.now(), { force: url.searchParams.get("force") === "1" });
         return json({ ok: true });
+      }
+      if (path === "/api/admin/resend" && method === "POST") {
+        const draftId = url.searchParams.get("draftId") ?? "";
+        return json({ ok: yield* resendCard(draftId, url.searchParams.get("note") ?? "🔁 <b>Moved here</b>") });
       }
       if (path === "/api/admin/card-pending" && method === "POST") {
         const sent = yield* cardPendingDrafts(10);

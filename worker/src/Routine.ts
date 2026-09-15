@@ -72,15 +72,15 @@ export class Routine extends Context.Service<
 
       const explain = (result: FireResult, at: Date = new Date()): string => {
         const next = nextCronLocal(settings.routineCronHoursUtc, at);
-        const run = `the ${next.label} run${next.tomorrow ? " tomorrow" : ""}`;
-        if (result.fired) return "⏳ Drafting now, about five minutes.";
+        const at_ = `${next.label}${next.tomorrow ? " tomorrow" : ""}`;
+        if (result.fired) return "✍️ The writer is on it now, about five minutes.";
         switch (result.reason) {
           case "gap":
-            return `⏳ Next attempt within the hour, at the latest ${run}.`;
+            return `⏳ The writer started less than an hour ago; it picks this up within the hour, at the latest at ${at_}.`;
           case "budget":
-            return `⏳ Today's ${settings.maxFiresPerDay} on-demand runs are used; drafted at ${run}.`;
+            return `⏳ The writer already started ${settings.maxFiresPerDay} times today; next start ${at_}.`;
           default:
-            return `⏳ Drafted at ${run}.`;
+            return `⏳ The writer starts at ${at_}.`;
         }
       };
 

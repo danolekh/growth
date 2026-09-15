@@ -33,6 +33,8 @@ export class Telegram extends Context.Service<
     readonly send: (html: string, options?: SendOptions) => Effect.Effect<number, TelegramError>;
     readonly sendDocument: (fileId: string, caption?: string) => Effect.Effect<void, TelegramError>;
     readonly edit: (messageId: number, html: string, options?: SendOptions) => Effect.Effect<void, TelegramError>;
+    /** Bots may delete their own messages for 48 hours; after that this fails and callers fall back to an edit. */
+    readonly delete: (messageId: number) => Effect.Effect<void, TelegramError>;
     readonly answerCallback: (callbackId: string, text?: string) => Effect.Effect<void, TelegramError>;
     readonly call: (method: string, body: Record<string, unknown>) => Effect.Effect<unknown, TelegramError>;
   }
@@ -50,6 +52,7 @@ export class Telegram extends Context.Service<
           send: () => noop(-1),
           sendDocument: () => noop(undefined),
           edit: () => noop(undefined),
+          delete: () => noop(undefined),
           answerCallback: () => noop(undefined),
           call: () => noop(undefined),
         };
@@ -112,6 +115,8 @@ export class Telegram extends Context.Service<
                 disable_web_page_preview: true,
                 ...markup(options),
               }).pipe(Effect.asVoid),
+        delete: (messageId) =>
+          !chatId ? needChat(undefined) : call("deleteMessage", { chat_id: chatId, message_id: messageId }).pipe(Effect.asVoid),
         answerCallback: (callbackId, text) =>
           call("answerCallbackQuery", { callback_query_id: callbackId, ...(text ? { text } : {}) }).pipe(Effect.asVoid),
         call,

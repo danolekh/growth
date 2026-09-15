@@ -55,13 +55,16 @@ src/Db.ts             repository over Drizzle; schema in src/db/schema.ts; SQL i
 - Bot commands: `/ping`, `/summary`, `/queue`, `/fire`, `/stage <applicationId> <stage>`,
   `/questions <draftId> <questions…>`.
 
-## When drafting happens
-Every scored job with an apply verdict goes into the routine's queue. The routine runs on its own
-cron (`ROUTINE_CRON_HOURS_UTC`, default 05/08/11/14/17 UTC = 07:00, 10:00, 13:00, 16:00, 19:00
-Vienna) and drafts everything queued. On top of that the Worker fires it on demand when a hot job
-is waiting, a reply came in, questions were pasted, or you tap **Draft it**, at most
-`MAX_FIRES_PER_DAY` times per Vienna day with `MIN_FIRE_GAP_MINUTES` between fires. Each card and
-each "Queued for drafting" edit says which of the two will pick it up.
+## When drafting happens ("the writer")
+The Worker never writes application text. That is done by the cloud routine, which the bot calls
+"the writer": a Claude Code session that clones this repo, reads the queue and posts drafts and
+answers back. It starts on its own timetable (`ROUTINE_CRON_HOURS_UTC`, default 05/08/11/14/17
+UTC = 07:00, 10:00, 13:00, 16:00, 19:00 Vienna) and drafts everything queued. The Worker also
+starts it on demand when a hot job is waiting, a reply came in, questions were pasted, or you
+tap **Draft it**, at most `MAX_FIRES_PER_DAY` starts per Vienna day with `MIN_FIRE_GAP_MINUTES`
+between them. Each card says when the writer picks it up. When something Dan waits for lands
+(answers, a reply draft), the card is re-sent at the bottom of the chat and the old copy deleted,
+so it never hides as a silent edit higher up. `POST /api/admin/resend?draftId=…` does that by hand.
 
 ## Apply flow (one message per job, edited in place)
 1. A card arrives: title, pay, flags, score, the buttons **Apply / Later / Skip** (or **Draft it**
