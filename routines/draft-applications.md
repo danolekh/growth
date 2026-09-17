@@ -111,7 +111,7 @@ to that message.md under `## Screening answers`, and POST
 For each `reply` item: write `applications/<slug>/reply-<n>.md` with a short, warm reply in the
 sender's language (answer their questions, propose two concrete time slots in CET if they ask
 for a call, keep salary numbers consistent with what was asked), then POST it with
-`"kind": "reply"` and the `messageId` from the item.
+`"kind": "reply"`, the `draftId` and the `messageId` from the item.
 
 6. Commit everything with message `draft: <n> applications, <m> replies (<date>)` and push to
    `main` (run `git pull --rebase origin main` first). Then POST the heartbeat:
