@@ -3,6 +3,13 @@
 Read this before drafting anything for a web3 job. Only claim what is listed here; addresses
 and links marked TBD are not live yet and must not be cited until they are filled in.
 
+## Lane status (read first)
+Drafting has been on since 2026-09-17 with **no deployed contract**. The proof is the public
+milestone-escrow repo. Until a Base Sepolia or mainnet address is filled in below, never call the
+escrow deployed, verified, live, on mainnet or on Basescan, never link a demo, and say "built", not
+"shipped on Base". When an address lands, fill it in here: the routine reads this file on every run,
+so the next drafts pick it up without a prompt change.
+
 ## The honest angle
 Dan is junior in EVM, not junior in engineering. Three years of commercial TypeScript, and a recent
 contract building the wallet, ledger and withdrawal services of a live iGaming platform (past tense,
@@ -11,64 +18,81 @@ September 2026. Before that: held crypto, did a Solidity/dapp tutorial. `~/code/
 scaffold and is never cited as a project.
 
 "How long in web3?" → "Hands-on since September 2026. Before that I held crypto and did tutorials.
-In four weeks I shipped a verified USDC escrow on Base, a reorg-safe indexer and effect-viem; the
-transferable part is three years of TypeScript and a recent contract building wallet and ledger
-services for a live iGaming platform."
+Since then I built a USDC milestone escrow for Base in Solidity and Foundry: 80 tests with fuzz and
+invariant suites, fork tests against real USDC, Slither in CI, all public. The transferable part is
+three years of TypeScript and a recent contract building wallet and ledger services for a live
+iGaming platform." (Once the addresses below exist, "built" becomes "deployed and verified on Base".)
 
 ## Projects (fill in as they ship)
-1. **milestone-escrow** — USDC milestone escrow for freelancers on Base, no admin key. Client funds
-   milestones, freelancer submits, client releases or the review window expires and the freelancer
-   claims. Foundry, Solidity 0.8, OpenZeppelin (SafeERC20, ReentrancyGuard), unit + fuzz + invariant
-   tests, slither in CI. Frontend: wagmi v2 + viem + TanStack Start on Cloudflare Workers.
-   - Repo: https://github.com/danolekh/milestone-escrow (public since 2026-09-15; 77 tests, 100% line and branch coverage)
-   - Base Sepolia: TBD · Base mainnet: TBD · Demo: https://escrow.danolekh.com (TBD)
+1. **milestone-escrow** — LIVE as a public repo; not deployed yet. USDC milestone escrow for
+   freelancers on Base, no admin key, no fee, no arbiter. Client funds milestones, freelancer
+   submits, client releases or the review window expires and the freelancer claims; either side can
+   cancel and the unstarted remainder goes back to the client. Foundry, Solidity 0.8, OpenZeppelin
+   (SafeERC20, ReentrancyGuard); funding checks the balance delta, so fee-on-transfer tokens revert.
+   80 tests: 72 unit and fuzz, 5 invariants (escrow balance equals funded minus released, no double
+   payout), 3 fork tests against real USDC on Base Sepolia. 100% line and branch coverage, Slither in
+   CI, README with a threat model and a "what it does not do" list.
+   - Repo: https://github.com/danolekh/milestone-escrow (public since 2026-09-15, CI green)
+   - Base Sepolia: TBD · Base mainnet: TBD
+   - Frontend (wagmi v2 + viem + TanStack Start): not built · Demo: https://escrow.danolekh.com (TBD)
    - Write-up: https://www.danolekh.com/b/usdc-escrow-on-base (TBD) · Page: /p/milestone-escrow (TBD)
-2. **evm-ledger-indexer** — reorg-safe double-entry ledger built from on-chain events (escrow events
-   and USDC transfers for a watch-list of addresses). Effect + viem + Cloudflare Workers cron + D1.
-   Cursors with block hashes, walk back to the fork point on reorg, idempotent writes keyed on
-   (chain, tx hash, log index), journal entries that sum to zero per event, reconcile against
-   balanceOf. Status page: https://ledger.danolekh.com (TBD). Repo: TBD. Write-up: TBD.
-3. **effect-viem** — viem clients as Effect services: typed errors, retry schedules, Streams for
-   blocks and logs. npm: TBD. Repo: TBD. Write-up: TBD.
+2. **evm-ledger-indexer** — NOT STARTED, never cite. Planned: reorg-safe double-entry ledger built
+   from on-chain events (escrow events and USDC transfers for a watch-list of addresses). Effect +
+   viem + Cloudflare Workers cron + D1. Cursors with block hashes, walk back to the fork point on
+   reorg, idempotent writes keyed on (chain, tx hash, log index), journal entries that sum to zero per
+   event, reconcile against balanceOf. Status page: https://ledger.danolekh.com (TBD). Repo: TBD.
+3. **effect-viem** — NOT STARTED, never cite. Planned: viem clients as Effect services: typed errors,
+   retry schedules, Streams for blocks and logs. npm: TBD. Repo: TBD.
 
 OSS in flight: wagmi issue #4396 (Foundry plugin, TypeScript) — cite only as "opened" with the link
 once the PR exists, "merged" only when merged. Existing merged PRs: opentui #558, code-racer #698/#660/#684/#658.
 
 ## Exact claims allowed
-- Solidity 0.8 basics, custom errors, events, OpenZeppelin patterns; Foundry: forge tests, fuzz,
-  invariant tests with handlers, fork tests, deploy scripts, Basescan verification.
-- viem and wagmi v2 in a wallet-connected frontend (injected, Coinbase Wallet, WalletConnect).
-- Event indexing with viem getLogs/getBlock, reorg handling, idempotent ingestion, reconciliation.
-- Base (Sepolia and mainnet) deploys and verification; USDC (6 decimals) handling.
-- Not allowed: production smart-contract experience beyond these repos, audits, Solana/Rust, MEV,
-  ERC-4337 (unless the paymaster add-on ships), "years" of anything web3.
+Now (backed by the escrow repo):
+- Solidity 0.8: custom errors, events, a per-job state machine, OpenZeppelin (SafeERC20,
+  ReentrancyGuard), ERC-20 approve/transferFrom with a balance-delta check, USDC (6 decimals).
+- Foundry: unit and fuzz tests, invariant tests with handlers, fork tests against real USDC,
+  coverage; Slither in CI.
+
+Only once the matching item above is filled in:
+- Base Sepolia/mainnet deploys and Basescan verification (needs an address).
+- viem and wagmi v2 in a wallet-connected frontend (needs the demo).
+- Event indexing with viem getLogs/getBlock, reorg handling, reconciliation (needs the indexer repo).
+
+Never: production smart-contract experience, audits, Solana/Rust, MEV, ERC-4337 (unless the
+paymaster add-on ships), "years" of anything web3.
 
 ## Message shape for web3 posts
-1. First two lines: the one shipped project that matches the post, with its live link and Basescan
-   address. 2. The money-correctness story, past tense: wallets, ledger, idempotent withdrawals for
-   a live iGaming platform. 3. One plain sentence: "I started on EVM in September 2026; here is what
-   I shipped since", then the other two links. 4. Name the gap in one line (no production contracts,
-   no audits). Resume variant `web3`. Location line for EU/US employers: Vienna, EU time zone.
+1. First two lines: milestone-escrow with the repo link and one detail that matches the post (the
+   fuzz and invariant tests for Solidity or security posts; the milestone flow and USDC handling for
+   product or frontend posts). Once a Basescan address exists above, add it to these two lines.
+2. The money-correctness story, past tense: wallets, ledger, idempotent withdrawals for a live
+   iGaming platform, company unnamed.
+3. One plain sentence: "I started on EVM in September 2026, and the escrow is the first thing I
+   built." Add links to other projects only once they are marked live above.
+4. Name the gap in one line: no production contracts and no audits yet. For posts that ask for
+   wagmi/viem, add that React and TanStack Query are production skills but wagmi/viem are new to me.
+Resume variant `web3`. Location line for EU/US employers: Vienna, EU time zone.
 
 ## Positioning texts
+(Add the address, demo, indexer and effect-viem back into these as each one ships.)
 - Headline: Full-stack TypeScript engineer, 3 years. Shipped wallets, ledgers and idempotent
-  withdrawals for a live iGaming platform. Now building on EVM: Solidity + Foundry on Base,
-  viem/wagmi, Effect. Everything is verified on Basescan.
-- X bio: Full-stack TS (3y). Built wallets & ledgers for a live iGaming platform. Now shipping on
-  Base: Solidity/Foundry, viem, Effect. Build in public → danolekh.com
+  withdrawals for a live iGaming platform. Now building on EVM: a USDC escrow for Base in Solidity
+  and Foundry, with fuzz and invariant tests, public on GitHub.
+- X bio: Full-stack TS (3y). Built wallets & ledgers for a live iGaming platform. Now building on
+  EVM: Solidity/Foundry, a USDC escrow for Base. Build in public → danolekh.com
 - Farcaster bio: TypeScript full-stack, 3 yrs. Shipped money-correct backends (wallets, ledgers,
-  idempotent withdrawals). Building on Base: escrow, indexer, effect-viem. Vienna. danolekh.com
+  idempotent withdrawals). Building a USDC milestone escrow for Base in Foundry. Vienna. danolekh.com
 - Summary (Djinni; LinkedIn later): Full-stack TypeScript engineer with three years of commercial
   work (React 19, Next.js, TanStack Start, Node/Bun, Effect, Drizzle, Postgres, Redis, Cloudflare
   Workers). My most recent contract was backend work for a live iGaming platform: wallet and ledger
   services, idempotent withdrawals keyed on a ledger index, single-statement bonus expiry with debit,
-  abuse limits and per-brand GEO rules. Since September 2026 I build on EVM: a USDC milestone escrow
-  on Base (verified contract, fuzz and invariant tests, wallet-connected demo), a reorg-safe
-  double-entry event indexer in Effect on Cloudflare D1, and effect-viem, an open-source Effect
-  wrapper for viem. I am new to Solidity and honest about it; what I bring is three years of
-  shipping production TypeScript and the habit of treating every balance as something that must
-  reconcile. Vienna, EU time zone, remote.
+  abuse limits and per-brand GEO rules. Since September 2026 I have been building on EVM: a USDC
+  milestone escrow for Base in Solidity and Foundry, with 80 tests including fuzz, invariant and fork
+  tests against real USDC, and Slither in CI, all public on GitHub. I am new to Solidity and honest
+  about it; what I bring is three years of shipping production TypeScript and the habit of treating
+  every balance as something that must reconcile. Vienna, EU time zone, remote.
 
 ## Identity (fill in)
 ENS: danolekh.eth (TBD) · Basename: danolekh.base.eth (TBD) · Farcaster: @danolekh (TBD) ·
-Deployer address: TBD · GitHub profile README: TBD
+Deployer address: TBD · GitHub profile README: https://github.com/danolekh/danolekh

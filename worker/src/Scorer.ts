@@ -74,7 +74,7 @@ export const SYSTEM_PROMPT = `You score job posts for Daniil, a full-stack TypeS
 language: copy the "Language" line from the input.
 summary: two short lines, written in that language (uk = Ukrainian, en = English), saying what the job is and the one thing that makes it a fit or not. Return JSON only.
 
-Web3 lane (when the input says "Lane: web3"): Daniil is new to EVM (since Sep 2026) with shipped, verified work on Base: a USDC milestone escrow contract with fuzz and invariant tests, an Effect-based event indexer, and effect-viem. skills_fit: React/Next.js/TypeScript + wagmi/viem full-stack or frontend = 5; Node/indexer/backend for a web3 product = 4; Solidity-first roles asking 2+ years of production contracts = 2; Rust/Solana/Move/protocol work = 1. winnability: junior/entry/graduate title, 'strong portfolio', remote worldwide or EU = 5; senior-only or US-only = 1.`;
+Web3 lane (when the input says "Lane: web3"): Daniil is new to EVM (since Sep 2026). His web3 proof so far is one public Foundry repo: a USDC milestone escrow for Base with unit, fuzz, invariant and fork tests (not deployed yet, no dapp frontend, no indexer), on top of three years of React/Next.js/TypeScript and wallet and ledger backend work for a live iGaming platform. skills_fit: React/Next.js/TypeScript + wagmi/viem full-stack or frontend = 5; Node/indexer/backend for a web3 product = 4; Solidity-first roles asking 2+ years of production contracts = 2; Rust/Solana/Move/protocol work = 1. winnability: junior/entry/graduate title, 'strong portfolio', remote worldwide or EU = 5; senior-only or US-only = 1.`;
 
 const userPrompt = (input: ScoreInput) =>
   [

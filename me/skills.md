@@ -60,11 +60,9 @@ Use this to match a job's requirements to concrete, honest claims. Only claim wh
 - AWS
 
 ## EVM / Web3 (hands-on since September 2026; see `web3.md` for what is live)
-- **Solidity 0.8** basics: custom errors, events, OpenZeppelin (SafeERC20, ReentrancyGuard), no upgradeability tricks
-- **Foundry**: forge tests, fuzz and invariant tests with handlers, fork tests, deploy scripts, Basescan (Etherscan v2) verification
-- **viem / wagmi v2** in wallet-connected frontends (injected, Coinbase Wallet, WalletConnect), TanStack Query for chain state
-- **Event indexing**: viem getLogs/getBlock, reorg handling with block-hash cursors, idempotent ingestion, reconciliation against balanceOf
-- **Base** (Sepolia + mainnet) deploys; USDC (6 decimals) handling
+- **Solidity 0.8** basics: custom errors, events, a per-job state machine, OpenZeppelin (SafeERC20, ReentrancyGuard), ERC-20 approve/transferFrom with balance-delta checks, USDC (6 decimals); no upgradeability tricks
+- **Foundry**: unit and fuzz tests, invariant tests with handlers, fork tests against real USDC, coverage; Slither in CI
+- Not claimed yet (planned; claim only once `web3.md` lists the address, demo or repo): Base deploys and Basescan verification, viem / wagmi v2 wallet-connected frontends, event indexing and reorg handling
 - Not claimed: production contract experience beyond the public repos, audits, Solana/Rust, MEV, ERC-4337
 
 ## Domain / Other

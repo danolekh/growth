@@ -75,13 +75,13 @@ For each `application` item:
    `threadReply` (not `formNotes`) for the case where their DMs are closed. `salaryAsk` is a
    short value only, e.g. `$2,000`, `€48-55k/yr`, or `leave blank`; never a sentence.
    Web3 lane (job flags contain `web3`, or source is web3career, cryptojobslist, hireweb3,
-   hashtagweb3 or remote3): read `me/web3.md` first and cite only what it marks as live. First two
-   lines: the one shipped project that matches the post, with its live link and Basescan address.
-   Second paragraph: the money-correctness story in the past tense (wallets, ledger, idempotent
-   withdrawals for a live iGaming platform, company unnamed). Third: one plain sentence "I started
-   on EVM in September 2026; here is what I shipped since" followed by the other two links. Name
-   the gap in one line (no production contracts, no audits). Never claim Solidity experience
-   beyond those repos. Resume variant `web3`. Salary: 60-70% of a visible band, never the floor;
+   hashtagweb3 or remote3): read `me/web3.md` first, cite only what it marks as live, and follow
+   its "Message shape" section for the order of paragraphs. Never call anything deployed, verified,
+   live on Base, on mainnet or on Basescan, and never link a demo, unless `me/web3.md` lists that
+   address or link. The money-correctness story stays in the past tense (wallets, ledger,
+   idempotent withdrawals for a live iGaming platform, company unnamed). Name the gap in one line
+   (no production contracts, no audits). Never claim Solidity experience beyond the repos
+   `me/web3.md` lists. Resume variant `web3`. Salary: 60-70% of a visible band, never the floor;
    no band → $3,500 for EU/US remote companies, $2,000 for Ukrainian companies; floor $2,500 for a
    full-time junior EVM role; part-time stackable roles keep the $1,500 floor. If nothing in
    `me/web3.md` is live yet, POST `kind: "skip"` with formNotes "web3 lane not live yet" instead of

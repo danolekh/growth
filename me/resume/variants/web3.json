@@ -2,7 +2,7 @@
   "name": "web3",
   "lane": "fullstack",
   "headline": "Full-Stack TypeScript Engineer · EVM",
-  "summary": "Full-stack TypeScript engineer with about three years of commercial work: React, Next.js and TanStack on the front, Node or Bun with PostgreSQL and Drizzle on the back, CI/CD and observability around it. Shipped the wallet, ledger and withdrawal services of a live iGaming platform: idempotent withdrawals keyed on a ledger index, single-statement bonus expiry with debit, abuse limits. Building on EVM since September 2026 with Foundry, Solidity, viem/wagmi and Effect on Base; contracts verified, tests public. Claude Code daily, everything reviewed.",
+  "summary": "Full-stack TypeScript engineer with about three years of commercial work: React, Next.js and TanStack on the front, Node or Bun with PostgreSQL and Drizzle on the back, CI/CD and observability around it. Shipped the wallet, ledger and withdrawal services of a live iGaming platform: idempotent withdrawals keyed on a ledger index, single-statement bonus expiry with debit, abuse limits. Building on EVM since September 2026: a USDC milestone escrow for Base in Solidity and Foundry, with fuzz, invariant and fork tests and Slither in CI, public on GitHub. Claude Code daily, everything reviewed.",
   "maxBullets": 4,
   "order": [
     "renewator",
