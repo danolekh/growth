@@ -62,11 +62,12 @@ Broad TypeScript fullstack developer with three angles, in current priority orde
    verbatim in a 5.0 review, public case study at https://www.danolekh.com/p/oasi-kadir. Small,
    fast, measurable jobs where the proof is nearly unbeatable.
 2. **Headless-CMS marketing sites** — Astro + Tailwind + Strapi, i18n, SEO, Vercel. Proven by the
-   same win. Fast to demo, clean handover.
+   same win and by consolline.com (Astro, 4 languages, WebGL animation, built solo). Fast to demo,
+   clean handover.
 3. **React/Next.js product work** — SaaS, dashboards, e-commerce, custom admin panels, role-based
-   auth. The deepest experience (Quextro founding engineer, Next.js 14 e-commerce, multi-tenant
-   systems for 10k+ users). MVP builds stay on the menu but don't outrank a certain quick win in
-   this phase (see `../playbook/job-selection.md` "CURRENT PHASE").
+   auth. The deepest experience (Quextro founding engineer, sportmagaz.com.ua built solo with its own
+   admin CMS, multi-tenant systems for 10k+ users). MVP builds stay on the menu but don't outrank a
+   certain quick win in this phase (see `../playbook/job-selection.md` "CURRENT PHASE").
 
 Take strong-fit general TypeScript work too while building up reviews and Job Success Score.
 

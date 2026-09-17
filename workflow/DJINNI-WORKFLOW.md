@@ -44,8 +44,12 @@ For each apply / apply-low, create `applications/<slug>-djinni/` with:
 Message rules (from `playbook/proposals.md`, they transfer one to one):
 - First two lines carry the job-specific hook. No greeting padding, no "I saw your posting".
 - Lead with the one proof that maps to their need: Quextro for solo ownership and AI features;
-  the recent iGaming microservices work for Node/Express/Postgres/Redis/event-driven work; Oasi
-  Kadir numbers for Astro, performance and funnels; Azulejo for TanStack Start, Cloudflare, catalogs.
+  the recent iGaming microservices work for Node/Express/Postgres/Redis/event-driven work;
+  sportmagaz.com.ua (built and deployed solo, custom admin CMS for 2,000+ products, Nova Poshta,
+  view transitions) for e-commerce, Next.js, admin panels and catalogs; consolline.com (built solo,
+  Astro, 4 languages, WebGL2 animation, checked against Figma) for Astro, animation-heavy UI, i18n
+  and Figma precision; Oasi Kadir numbers for performance and funnels; Azulejo for TanStack Start
+  and Cloudflare. Case studies: danolekh.com/p/sportmagaz, /p/consolline, /p/oasi-kadir.
 - Never say or imply that Dan has a job right now. No "day job", "current work", "my current
   role", "alongside", "in parallel", "capacity for another role", hours per week, or a company
   named as a present employer. Write about the iGaming platform as recent contract work in the

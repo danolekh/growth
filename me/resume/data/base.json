@@ -1,5 +1,5 @@
 {
-  "_note": "Single source of truth for every resume variant. Confirm the public name of the current employer before sending (workspace name is Renewator).",
+  "_note": "Single source of truth for every resume variant. Confirm the public name of the 2026 contract company before sending (workspace name is Renewator). Its dates read \"2026\", never \"present\" (Dan's call, 2026-09-17).",
   "name": "Daniil Olekh",
   "contacts": {
     "location": "Vienna, Austria · remote, EU time zone",
@@ -14,9 +14,17 @@
       "id": "renewator",
       "company": "Renewator",
       "title": "Software Engineer (contract)",
-      "dates": "Aug 2026 – present",
+      "dates": "2026",
       "where": "Remote",
       "bullets": [
+        {
+          "p": 1,
+          "lanes": [
+            "frontend",
+            "astro"
+          ],
+          "text": "Built consolline.com solo in Astro for an international logistics company: 4 languages, 148 static pages, custom WebGL2 globe and halftone shaders, scroll-driven sections with no animation library, headlines sized at build time so no language shifts layout, checked against Figma with pixel diffs."
+        },
         {
           "p": 1,
           "text": "Built event-driven Node.js microservices for a live iGaming platform (identity, gateway, wallet, bonus, casino, notification): Express, Drizzle ORM, PostgreSQL, Redis, Docker, GitLab CI."
@@ -41,25 +49,17 @@
         {
           "p": 4,
           "lanes": [
+            "fullstack"
+          ],
+          "text": "Built consolline.com solo: a four-language Astro site with WebGL2 animation, checked against Figma with pixel diffs."
+        },
+        {
+          "p": 4,
+          "lanes": [
             "backend",
             "fullstack"
           ],
           "text": "Auth hardening: strict rate limits on the login/register aliases, session-revocation events on password change and reset, consumed by the gateway."
-        },
-        {
-          "p": 2,
-          "lanes": [
-            "frontend",
-            "astro"
-          ],
-          "text": "Astro marketing site for a logistics operator: 14 routes in three locales (uk/en/pl), pixel-matched against Figma with measured diffs, static build served by nginx."
-        },
-        {
-          "p": 5,
-          "lanes": [
-            "fullstack"
-          ],
-          "text": "Also an Astro marketing site for a logistics operator: 14 routes × 3 locales, pixel-matched against Figma."
         }
       ]
     },
@@ -135,7 +135,7 @@
       "bullets": [
         {
           "p": 1,
-          "text": "Delivered a full e-commerce platform from scratch on Next.js 14 + Drizzle ORM: custom admin panel for 2,000+ products, dynamic filtering, role-based auth."
+          "text": "Built and deployed sportmagaz.com.ua solo, a sports-equipment store for Ukraine: Next.js 14, tRPC, Drizzle ORM and PostgreSQL, with a custom admin CMS for 2,000+ products (roles, specs editor, S3 image manager), attribute filters with live counts, Nova Poshta delivery lookup and Telegram order alerts."
         },
         {
           "p": 2,
@@ -144,7 +144,16 @@
             "astro",
             "fullstack"
           ],
-          "text": "90+ Real Experience Score and steady organic SEO traffic (meta, Open Graph, JSON-LD)."
+          "text": "Re-platformed it in 2026 to static Astro on Cloudflare Workers: view transitions that morph the product photo into its page, prices re-checked on the server by an Effect checkout worker."
+        },
+        {
+          "p": 3,
+          "lanes": [
+            "frontend",
+            "astro",
+            "fullstack"
+          ],
+          "text": "90+ Real Experience Score and steady organic SEO traffic (JSON-LD, sitemap, Google Merchant feed)."
         }
       ]
     },
@@ -185,8 +194,8 @@
   ],
   "skills": {
     "Languages": "TypeScript, JavaScript, Python, SQL",
-    "Frontend": "React 19, Next.js (App Router), TanStack Start / Router / Query, Astro, Tailwind CSS, Zustand, Radix / Base UI, Vite",
-    "Backend": "Node.js, Bun, Express, Hono, Effect.ts, REST APIs, webhooks, Zod, event-driven services",
+    "Frontend": "React 19, Next.js (App Router), TanStack Start / Router / Query, Astro, Tailwind CSS, View Transitions, WebGL2, Zustand, Radix / Base UI, Vite",
+    "Backend": "Node.js, Bun, Express, Hono, Effect.ts, tRPC, REST APIs, webhooks, Zod, event-driven services",
     "Data": "PostgreSQL, Drizzle ORM, Redis, SQLite, S3 / R2",
     "Infra": "Docker, GitHub Actions, GitLab CI, Vercel, Cloudflare Workers, AWS, Railway, OpenTelemetry",
     "Other": "Strapi, Core Web Vitals / performance, SEO, i18n, LLM integration, Vitest, Claude Code daily (1+ yr)"

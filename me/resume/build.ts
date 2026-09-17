@@ -56,7 +56,7 @@ function loadVariant(ref: string): Variant {
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const linkify = (s: string) =>
-  esc(s).replace(/\b((?:[a-z0-9-]+\.)+(?:com|io|dev|app|website)(?:\/[\w\-./#?=&]*)?)/g, '<a href="https://$1">$1</a>');
+  esc(s).replace(/\b((?:[a-z0-9-]+\.)+(?:com|io|dev|app|website)(?:\.ua)?(?:\/[\w\-./#?=&]*)?)/g, '<a href="https://$1">$1</a>');
 
 function pickBullets(role: Role, v: Variant): Bullet[] {
   const extra = v.extraBullets?.[role.id] ?? [];

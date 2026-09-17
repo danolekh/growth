@@ -17,12 +17,16 @@ PDF and link. Nothing is ever auto-submitted on Upwork or LinkedIn. A daily summ
 - `me/profile.md`, `me/experience.md`, `me/skills.md`, `me/portfolio.md` — the only sources
   of claims. Never promise outside `me/skills.md`.
 - `me/resume/` — resume generator (`bun run build` on the Mac; Chrome required). Variants:
-  fullstack, frontend, backend, astro-perf. PDFs in `me/resume/out/` are committed and uploaded
-  to Telegram once via `scripts/upload-resumes.ts`.
+  fullstack, frontend, backend, astro-perf, web3. PDFs in `me/resume/out/` are committed and
+  re-uploaded to Telegram after every rebuild via `scripts/upload-resumes.ts`.
 - `me/djinni-profile.md`, `me/linkedin-profile.md` — paste-ready profile texts (Vienna, 3 yrs).
 - `playbook/proposals.md` — Dan's voice rules. Mandatory for every message.
+- `playbook/interviews.md` — the spoken intro, four stories, gap answers and call rules. Never
+  mention current work; the 2026 contract reads "2026", never "present".
 - `playbook/income-plan-2026-09.md` — goal, channels, salary asks, stacking rules.
 - `case-studies/oasi-kadir.md` — the anchor proof (69→99 mobile PageSpeed, 5.0 review).
+- Live solo builds to name: **sportmagaz.com.ua** (store + custom admin CMS) and **consolline.com**
+  (Astro, 4 languages, WebGL2); case studies at danolekh.com/p/sportmagaz and /p/consolline.
 
 ## Working here
 - **Effect first.** Worker code is Effect 4 (`effect@4.0.0-beta.102`, pinned with Alchemy
