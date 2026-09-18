@@ -5,21 +5,11 @@ from `me/web3.md`. This file is Dan's to-do list for week 1 and the copy for the
 
 ## Dan's inputs
 Done 2026-09-15: GitHub CLI logged in, Etherscan key (in `~/code/milestone-escrow/.env`), web3.career
-token (feed live), site deploy approved and shipped. Drafting went live 2026-09-17 without a deploy
-(repo-first messages, see `me/web3.md`). Steps 1-4 cost nothing and add the Basescan address;
-steps 5-6 cost money and wait until a web3 company replies. Still open, in this order:
+token (feed live), site deploy approved and shipped. Drafting went live 2026-09-17 (see `me/web3.md`).
+Done 2026-09-18, all free: Rabby wallet `0x4a850c89fbbb288cc89fc5fb2d2609e523caec2d` (keystore
+`deployer`), CDP faucet ETH, and the Base Sepolia deploy + Basescan verification. Steps 5-6 cost
+money and wait until a web3 company replies. Still open:
 
-1. **Wallet** (10 min): install Rabby (browser) or Coinbase Wallet, create a new wallet. This address
-   is the public web3 identity: it deploys the contracts and owns the ENS name.
-   Do not use `0x25f5…0Cac`; its key appeared in a session log and it is discarded.
-2. **Deployer keystore** (2 min, in your own terminal): export the private key from the wallet app,
-   run `cast wallet import deployer --interactive`, paste the key, set a password.
-3. **Test ETH** on Base Sepolia to that address: https://portal.cdp.coinbase.com/products/faucet or
-   https://faucets.chain.link/base-sepolia.
-4. **Deploy** (2 min): `cd ~/code/milestone-escrow && make deploy-sepolia`, type the keystore
-   password; it deploys and verifies on Basescan (the free Etherscan key covers Base Sepolia).
-   Send Claude the contract address: it goes into `me/web3.md`, the README table and the resume
-   line, and the next drafts carry it with no Worker deploy.
 5. **ENS** (paid, deferred) `danolekh.eth` at https://app.ens.domains (~$5/yr + Ethereum fee, budget
    ~$30 of ETH on Ethereum mainnet): connect the wallet, register for 2 years (two transactions about
    a minute apart), set it as the primary name, add avatar, website, GitHub and X records.
@@ -55,15 +45,16 @@ second line or a reply; no hashtags; five real replies in wevm/Base/Foundry thre
 > Shipped: milestone-escrow on Base Sepolia, verified.
 > Client funds USDC milestones, freelancer submits, client releases or the review window expires
 > and the freelancer claims. No admin key, no arbiter.
-> N tests, fuzz + one invariant (escrow balance == funded minus released), slither in CI.
+> 80 tests, fuzz + 5 invariants (escrow balance == funded minus released, no double payout), slither in CI.
 > Limitation: no partial releases, no fee-on-transfer tokens.
-> Mainnet next week. [Basescan link] [repo]
+> https://sepolia.basescan.org/address/0x028fb5c4e093d679f56323a70773bad7ab864d77 [repo]
 
 ## Where things stand (update as they land)
 - milestone-escrow: public at https://github.com/danolekh/milestone-escrow (80 tests, 100% coverage,
-  CI with slither); Sepolia deploy waits on the wallet steps above; mainnet + demo in week 2
+  CI with slither); deployed and verified on Base Sepolia 2026-09-18 at
+  `0x028FB5C4E093D679f56323a70773bAd7aB864d77`; mainnet + demo still open (both cost money)
 - Profile README: https://github.com/danolekh/danolekh (live 2026-09-15)
 - Worker web3 lane: five feeds live incl. web3.career; drafting live since 2026-09-17
-  (`WEB3_LIVE=true`), messages lead with the repo until the Sepolia address exists
+  (`WEB3_LIVE=true`), messages lead with the verified Sepolia address and the repo
 - Site: deployed 2026-09-15 with the hydraulics case study and the /b writing index; web3 pages
   stay behind the `WEB3_LIVE` flag and `draft: true` until the Sepolia address exists

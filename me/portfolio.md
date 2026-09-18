@@ -58,7 +58,7 @@ Always have at least one **live, clickable** link ready. Live demos beat descrip
 > sportmagaz.com.ua, consolline.com, Azulejo, Quextro, the OSS PRs, and the GitHub repos below.
 
 ## Web3 (in progress, Sept–Oct 2026; cite only what `web3.md` marks as live)
-- **milestone-escrow** — USDC milestone escrow for Base in Solidity + Foundry: 80 tests (unit, fuzz, invariant, fork against real USDC), 100% coverage, Slither in CI. Public repo; not deployed yet, no demo yet. Links: see `web3.md`.
+- **milestone-escrow** — USDC milestone escrow for Base in Solidity + Foundry: deployed and verified on Base Sepolia, 80 tests (unit, fuzz, invariant, fork against real USDC), 100% coverage, Slither in CI. No mainnet deploy or demo yet. Links: see `web3.md`.
 - **evm-ledger-indexer** — planned, not started; never cite.
 - **effect-viem** — planned, not started; never cite.
 
@@ -101,7 +101,7 @@ else's codebase (great for "extend/maintain existing code" jobs). All merged, al
   bundle → 1:1 Astro rebuild) + the OSS PRs.
 - **Cloudflare Workers / edge deploy** → Azulejo (Workers + Hyperdrive).
 - **Data layer / Drizzle / Postgres** → Azulejo + drizzle-seeder repo.
-- **Web3 / EVM / dapp / Solidity / indexer** → milestone-escrow (the only live web3 project: repo link, no address yet) + the iGaming money-correctness story in the past tense. The indexer and effect-viem join once `web3.md` marks them live.
+- **Web3 / EVM / dapp / Solidity / indexer** → milestone-escrow (the only live web3 project: verified Base Sepolia address + repo link) + the iGaming money-correctness story in the past tense. The indexer and effect-viem join once `web3.md` marks them live.
 
 ## Deeper proof — Azulejo source
 The full Azulejo codebase is local at **`~/code/terra-and-sol`**. When a job needs a specific
