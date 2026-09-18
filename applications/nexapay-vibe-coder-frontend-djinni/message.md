@@ -16,6 +16,19 @@ Based in Vienna, an hour behind Estonia, so a 9 to 7 window works fine for me. H
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh
 
+## Screening answers
+
+**Share a link to the best website or interface you have personally built using AI tools. It must
+be your own work, built by you from start to finish — not a team project or a template. Please
+briefly describe it.**
+
+consolline.com - I built this solo, from an empty repo, using Claude Code throughout. It's the
+site of an international logistics company: Astro, 4 languages (uk/en/pl/ru), 148 static pages.
+The parts I'm proudest of are hand-rolled, no animation library: a WebGL2 globe that reacts to
+scroll and hands back drag velocity on release, a halftone dot field the pointer pushes around, and
+headlines sized at build time so nothing shifts layout across languages. I checked it pixel by
+pixel against the Figma frames before launch. Case study: danolekh.com/p/consolline.
+
 ## Form settings
 - **Salary expectations:** $2,000. No visible band, EU product company, so this is the standard ask.
 - **Resume:** `me/resume/out/Resume-frontend.pdf`
