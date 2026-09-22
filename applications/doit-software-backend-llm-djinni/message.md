@@ -1,33 +1,36 @@
 # Djinni application — DOIT Software
 
-English.
+English post, English company description. Send English only.
+
+Angle: the Quextro LLM feature is real production prompt engineering, which is the strongest honest
+match for "LLM/RAG, MCP, AI agents". Name RAG/MCP/queue-tech gaps plainly in one paragraph.
 
 ## Message (send this)
 
-Node.js and TypeScript on a real product's backend is daily work for me, so let me start with the
-part of your post I can't fully claim: production RAG and MCP-based agent development. I haven't
-shipped that specific shape. What I have shipped is an LLM pipeline at Quextro, an ed-tech
-platform I built solo, that extracts structured questions and topics out of PDF exam papers and
-runs in production for real users. It's LLM integration with prompt engineering, just not the
-RAG/agent-framework pattern your post asks for, so I'd rather say that now than in the technical
-interview.
+Your post asks for someone who has actually shipped an LLM feature. At Quextro, the ed-tech platform
+I built solo, I wrote the core algorithm that extracts questions and topics from PDF exam papers,
+real prompt engineering running in production.
 
-Everything else on your list is close to how I already work. REST APIs, JSON, Git, Node.js and TypeScript are my daily tools, most recently across six microservices I shipped for a live iGaming platform (Express, Drizzle, Postgres, Redis, Docker, GitLab CI). Database design and optimization
-in Postgres with Drizzle is daily too, including money-correctness work like idempotent writes and
-single-statement updates where a race condition would cost someone real money. I've worked in AWS
-at Quextro, though not GCP or Azure specifically. I haven't used RabbitMQ or SQS, or n8n/make, so
-that would be new ground, but async patterns and queues aren't unfamiliar territory conceptually.
+I'm a full-stack TypeScript developer with three years commercial experience. Quextro was solo end
+to end: Bun and Effect.ts on the backend, Postgres with Drizzle, React 19 and TanStack on the front,
+Docker, GitHub Actions and OpenTelemetry so I could actually debug it once real users showed up. It's
+used by British teachers and students today. On a recent contract I shipped six Node microservices
+for a live iGaming platform, Express, Drizzle, Postgres, Redis, event-driven between services with
+idempotency keys and rate limits. REST APIs and SQL schema design are daily work for me.
 
-I built Quextro solo from an empty repo to real users, British teachers and students use it today,
-so I'm used to owning a backend end to end and talking to the product side of decisions, not just
-implementing a ticket.
+A few honest gaps, since you're hiring for a specific stack. I haven't built a production RAG
+pipeline or an MCP server myself, though I use Claude Code daily and work with MCP-connected tools,
+so the shape of it is familiar. My event-driven work has been Redis-based rather than RabbitMQ or SQS
+by name, and I haven't touched n8n or make. I'd rather say that now than in week one.
 
-Happy to do a technical task if that's the fastest way to check fit.
+I'm comfortable with customer-facing work and shifting priorities, that's basically how solo
+ownership at Quextro worked day to day.
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh
 
 ## Form settings
-- **Salary expectations:** $1,500. No explicit number shown, lowest Djinni tier symbol suggests a
-  modest budget - Ukrainian-company default applies; be ready to negotiate down if pushed.
+- **Salary expectations:** $1,500. No band shown on the post ("$" placeholder only); Ukrainian
+  no-band rule applies.
 - **CV:** `me/resume/out/Resume-backend.pdf`
-- **Timing:** posted today (14 Sep), 0 applications so far - send now while it's still first-mover.
+- **Timing:** 0 applications, 14 views, posted today (22 Sep). Send now, this is the freshest post
+  of the run.
