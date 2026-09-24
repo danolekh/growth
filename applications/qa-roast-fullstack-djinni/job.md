@@ -1,58 +1,56 @@
-# QA Roast — Strong Junior Full-Stack JavaScript developer (Djinni)
+# QA Roast — Strong Junior Full-Stack JavaScript Developer
 
-- **Company:** QA Roast (qaroast.com) — QA services + automation + web/mobile dev for client teams
-- **Role:** Strong Junior Full-Stack JS (front-end leaning React, with Node backend work)
-- **Published:** 12 Aug 2026 · 292 views · 75 applications
-- **Response activity:** Low, but last responded 5 hours ago (recruiter is actively reading)
-- **Note:** Dan already has an open conversation with this recruiter on Djinni. Check that dialog
-  before sending — if it was a different role or an earlier rejection, the message should nod to it.
-- **Languages required:** English B2+, Ukrainian native (Dan matches both)
+> **⚠ Check before sending: Dan already applied to QA Roast for this same role on 2026-08-14**
+> (an earlier posting, published 12 Aug 2026, 292 views/75 applications) and has an **open
+> conversation with this recruiter on Djinni**. This is a fresh repost of essentially the same
+> role six weeks later. Read that existing Djinni thread first — if the recruiter never replied,
+> a short follow-up referencing it may land better than this generic draft; if they already said
+> no or it's a different req, this draft is fine as is.
 
-## Verdict: pursue
+- **Source:** Djinni.co · https://djinni.co/jobs/850039-strong-junior-full-stack-javascript-developer/
+- **Published:** 24 Sep 2026 · 17 views · **3 applications** (as of draft time)
+- **Company:** QA Roast — an outstaff company placing developers with early-stage healthcare,
+  fintech and AI clients on React + Node.js work; distributed team, no public site found in a
+  quick check.
+- **Format:** Full Remote · Worldwide · Outstaff · English B2+
+- **Salary:** lowest displayed Djinni tier (`$`), no exact number shown
+- **Years required:** 1 (Dan: 3, comfortably above the bar)
 
-Applied 2026-08-14.
+## Raw post (abridged)
+Expanding engineering team for early-stage clients in healthcare, fintech and AI. Primarily
+front-end oriented but backend contribution in Node.js matters. Work: React web apps; Node.js
+backend services/APIs (Nest.js or similar); cloud/containers (Docker, Kubernetes, AWS/GCP);
+architecture discussions; English collaboration with the client's team. Must: strong JS
+(ES6+)/TypeScript, solid React, strong Node.js + Nest.js/Express, API building, relational/NoSQL
+DBs (Postgres, MongoDB, Firebase, Supabase), clean maintainable code, English B2+. Nice: AWS/GCP,
+React Native, Docker/Kubernetes, CI/CD (GitHub Actions/GitLab CI/CircleCI), AI/LLM integration
+experience. Offers: USD comp, flexible payment by location, full remote, distributed team,
+English practice, paid sick leave + 15 days vacation, psychologist support.
 
-## Fit
-
-Strong. This is close to a one-to-one match on the primary stack.
-
-| They want | Dan has |
+## Requirements → Dan
+| They want | Dan |
 |---|---|
-| JS ES6+ / TypeScript | Primary language, daily, deep |
-| Solid React | React 19, Next.js 14 App Router, TanStack |
-| Node.js + Nest.js or Express | Express at Radency (multi-tenant, 10k+ users); NestJS on internal HR tools at Radency; Bun/Hono on Quextro |
-| APIs with Node frameworks | REST APIs across every project |
-| Postgres / Mongo / Firebase / Supabase | Postgres + Drizzle (deep), SQLite, Firebase at Radency |
-| Docker, K8s, AWS/GCP | Docker daily, AWS + Cloudflare, GitHub Actions CI/CD, OpenTelemetry. **K8s is a gap** |
-| Clean code / architecture discussions | Solo-owned a whole platform, so architecture calls were all his |
-| English B2 | B2, works with English-speaking clients |
-| AI/LLM integrations (plus) | Quextro's core is an LLM pipeline over PDF exam papers |
-| React Native (plus) | Not claimed |
+| Strong JS (ES6+) / TypeScript | **Yes** |
+| Solid React | **Yes** |
+| Strong Node.js + Nest.js/Express | **Partial**: Express in production (iGaming microservices), no Nest.js |
+| Building APIs with Node frameworks | **Yes**, Express APIs |
+| Postgres / MongoDB / Firebase / Supabase | **Yes**: Postgres daily, Supabase across client work |
+| Clean, maintainable code | **Yes** |
+| English B2+ | Assumed yes (drafting in English) |
+| AWS or GCP | **Partial**: AWS yes (Quextro, S3/R2), no GCP |
+| Docker, Kubernetes | **Partial**: Docker daily, no Kubernetes |
+| React Native | **Gap** |
+| CI/CD (GH Actions, GitLab CI, CircleCI) | **Yes** |
+| AI/LLM integration | **Yes** (Quextro's exam-paper extraction pipeline) |
 
-## Honest gaps to state up front
+## Stack-ability
+Outstaff placement into a client team, full-time employment — reads more like a single-role
+outstaff seat than a low-touch stackable gig, so treat the hours as a real commitment rather than
+assuming part-time. Core requirements (JS/TS, React, Node/Express, Postgres) are a strong match;
+the gaps (Nest.js, Kubernetes, GCP, React Native) are all listed as "additional advantages," not
+hard requirements.
 
-- **Kubernetes** — Docker yes, K8s no production experience.
-- **MongoDB** — they list 1 year. Dan's document-store experience is Firebase, not Mongo. Postgres
-  is the real depth. Say it plainly rather than let it surface in a tech interview.
-- **React Native** — no.
-
-## Angle
-
-Agency work means the client's team judges the developer directly, so lead with "I've shipped whole
-products solo and talked to the actual users," plus the perf-rescue proof and the 5.0 review. Then
-be crisp about the two gaps. Junior-role recruiters reward honesty more than a wide claim list.
-
-## Screening answers
-
-1. **English level:** B2 (Upper-Intermediate). Comfortable in daily written comms, calls, and code
-   review. Understands technical speech well; still tightening fluency in fast free-form discussion.
-2. **Spoken in English in dev-team meetings:** Yes.
-3. **Commercial experience as Full-Stack or Front-End:** Yes.
-4. **Months of commercial experience:** 30.
-   > ⚠️ Djinni profile currently says **1.5 years** of work experience. 30 months contradicts it.
-   > Bump the profile field to 2.5 years (Radency 2023–24 + freelance 2024 + Quextro Dec 24–Dec 25
-   > supports it) so the two numbers agree, or answer 18 here. Don't leave them mismatched.
-
-## CV
-
-Attach `Resume.pdf` (already on the profile).
+## Verdict
+**Apply.** Junior bar (1 year) is well inside Dan's 3 years, remote, and the required stack lines
+up cleanly with recent production work. No real salary band shown, so use the floor default and
+name the gaps plainly in the message.
