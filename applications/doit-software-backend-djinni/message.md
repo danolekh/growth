@@ -1,37 +1,37 @@
 # Djinni application — DOIT Software
 
-English (post is in English, B2+ required).
+English post, English company.
 
 ## Message (send this)
 
-The LLM and prompt-engineering focus of this role is what caught my eye. At Quextro, an ed-tech
-platform I built solo from an empty repo, I built the core LLM algorithm that extracts questions
-and topics from PDF exam papers, prompt design and all, and the product is used by British
-teachers and students today. That's structured extraction rather than a vector-search RAG stack,
-but it's real prompt-engineering work that shipped and stayed reliable in front of real users.
+Automated lead-gen and outreach touches ground I already work in. At Quextro I wrote the core LLM
+algorithm that reads PDF exam papers and pulls out questions and topics, and prompt engineering is
+something I practice daily running Claude Code on real feature work.
 
-On the backend side I'm a TypeScript developer with three years commercial experience, Node daily.
-On a live iGaming platform I shipped six Express microservices, identity, gateway, wallet, bonus,
-casino and notification, with Drizzle, Postgres and Redis, including per-brand access rules and
-idempotent withdrawal logic. Before that I built Quextro end to end solo: Bun, Postgres with
-Drizzle, Docker, GitHub Actions and OpenTelemetry, deployed on AWS and Railway.
+I'm a TypeScript and Node.js backend developer. I built Quextro as founding engineer, solo, from an
+empty repo to a product British teachers and students use today: Bun and Effect.ts on the backend,
+Drizzle ORM over Postgres, Docker, CI/CD and OpenTelemetry on AWS and Railway. On my last contract I
+shipped six Node.js microservices for a live iGaming platform, Express, Drizzle, Postgres and Redis,
+with domain events passed between services and idempotency keys on the money-moving paths.
 
-Two gaps worth naming since you listed them specifically. I haven't built or wired up an MCP
-server, though I use Claude Code and MCP-based tooling daily as a power user, so I know the
-protocol well from the client side. And I haven't used RabbitMQ or SQS. My async work has been
-domain events between services and Redis for counters and rate limits, not a dedicated queue, and
-I haven't touched n8n or make either.
+A few things on your list plainly. I haven't built a RAG pipeline or an MCP server, so that part is
+new ground for me, though I use agent tooling like Claude Code daily and understand the shape of
+tool-calling workflows from using them constantly. I haven't touched RabbitMQ or SQS by name, but
+the event-driven work between microservices on the iGaming platform solves the same problem:
+services reacting to events instead of polling. I haven't used n8n or make.
 
-SQL schema design is daily work for me with Postgres and Drizzle, and I've run CI/CD, Docker and
-OpenTelemetry on AWS and Railway, though not GCP or Azure.
+REST APIs and Git are daily work for me, SQL schema design and query optimization is what I do at
+Quextro and on the platform work, and AWS is real too, from Quextro's CI/CD and observability setup,
+though I haven't touched GCP or Azure directly. I've been client-facing on every freelance contract
+so far, so customer calls are fine.
 
-Happy to do a quick call or a short test task, whichever is faster for you to evaluate.
+Happy to do the coding round whenever it fits your process.
 
 Portfolio: danolekh.com · GitHub: github.com/danolekh
 
 ## Form settings
-- **Salary expectations:** $1,500. No numeric band shown (Djinni's lowest `$` tier icon only),
-  Ukrainian company, so the no-band Ukrainian-company default applies.
+
+- **Salary expectations:** $1,500. No visible band ("$" only), Ukrainian company, so the no-band
+  rate applies.
 - **CV:** `me/resume/out/Resume-backend.pdf`
-- **Timing:** published today (23 Sep), only 2 applications so far. Send now, this is the freshest
-  post of the day.
+- **Timing:** posted today (25 Sep), 18 views, 1 application, flagged hot by the watcher. Send now.
